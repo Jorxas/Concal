@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 type UpdateSessionOptions = {
   /**
    * When this returns true and there is no authenticated user, the user is
-   * redirected to `/` with a `next` query param (swap for `/login` when auth UI exists).
+   * redirected to `/login` with a `next` query param.
    */
   isProtectedPath?: (pathname: string) => boolean;
 };
@@ -31,7 +31,8 @@ export async function updateSession(
     );
     if (options?.isProtectedPath?.(request.nextUrl.pathname)) {
       const fallback = request.nextUrl.clone();
-      fallback.pathname = "/";
+      fallback.pathname = "/login";
+      fallback.searchParams.set("next", request.nextUrl.pathname);
       return NextResponse.redirect(fallback);
     }
     return supabaseResponse;
@@ -60,10 +61,25 @@ export async function updateSession(
     data: { user },
   } = await supabase.auth.getUser();
 
-  const needsAuth = options?.isProtectedPath?.(request.nextUrl.pathname);
+  const pathname = request.nextUrl.pathname;
+  const isAuthPage = pathname === "/login" || pathname === "/register";
+
+  if (user && isAuthPage) {
+    const home = request.nextUrl.clone();
+    home.pathname = "/dashboard";
+    home.search = "";
+    const redirectResponse = NextResponse.redirect(home);
+    const setCookies = supabaseResponse.headers.getSetCookie();
+    setCookies.forEach((cookie) => {
+      redirectResponse.headers.append("set-cookie", cookie);
+    });
+    return redirectResponse;
+  }
+
+  const needsAuth = options?.isProtectedPath?.(pathname);
   if (needsAuth && !user) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/";
+    redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
     const redirectResponse = NextResponse.redirect(redirectUrl);
 
