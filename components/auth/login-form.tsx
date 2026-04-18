@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -20,7 +20,29 @@ export type LoginFormDict = {
   noAccount: string;
   register: string;
   unexpected: string;
+  loginErrors: {
+    authCallback: string;
+    invalidCredentials: string;
+    emailNotConfirmed: string;
+  };
 };
+
+function mapSignInError(
+  message: string,
+  loginErrors: LoginFormDict["loginErrors"],
+): string {
+  const m = message.toLowerCase();
+  if (m.includes("email not confirmed")) {
+    return loginErrors.emailNotConfirmed;
+  }
+  if (
+    m.includes("invalid login credentials") ||
+    m.includes("invalid email or password")
+  ) {
+    return loginErrors.invalidCredentials;
+  }
+  return message;
+}
 
 export function LoginForm({ dict }: { dict: LoginFormDict }) {
   const router = useRouter();
@@ -37,6 +59,13 @@ export function LoginForm({ dict }: { dict: LoginFormDict }) {
   >({});
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const err = searchParams.get("error");
+    if (err === "auth_callback") {
+      setFormError(dict.loginErrors.authCallback);
+    }
+  }, [searchParams, dict.loginErrors]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,7 +94,7 @@ export function LoginForm({ dict }: { dict: LoginFormDict }) {
       });
 
       if (error) {
-        setFormError(error.message);
+        setFormError(mapSignInError(error.message, dict.loginErrors));
         return;
       }
 

@@ -121,7 +121,12 @@
       "signIn": "Se connecter",
       "confirmInfo": "Compte créé. Si la confirmation par email est activée, consulte ta boîte avant de te connecter."
     },
-    "unexpected": "Erreur inattendue. Réessaie."
+    "unexpected": "Erreur inattendue. Réessaie.",
+    "loginErrors": {
+      "authCallback": "Le lien de confirmation n’a pas pu terminer la connexion (expiré, déjà utilisé ou incomplet). Réessaie depuis un nouveau mail ou connecte-toi si ton compte est déjà actif.",
+      "invalidCredentials": "Email ou mot de passe incorrect. Si tu viens de t’inscrire, ouvre d’abord le lien dans le dernier mail de confirmation pour activer le compte, puis réessaie — ou vérifie que tu n’as pas de faute de frappe.",
+      "emailNotConfirmed": "Ton adresse e-mail n’est pas encore confirmée. Clique sur le lien reçu par mail (vérifie les courriers indésirables), puis connecte-toi."
+    }
   },
   "dashboard": {
     "title": "Tableau de bord",

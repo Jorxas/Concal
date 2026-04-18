@@ -15,7 +15,11 @@ function LoginFormFallback({ label }: { label: string }) {
 
 export default async function LoginPage() {
   const { dict } = await getI18n();
-  const formDict = { ...dict.auth.login, unexpected: dict.auth.unexpected };
+  const formDict = {
+    ...dict.auth.login,
+    unexpected: dict.auth.unexpected,
+    loginErrors: dict.auth.loginErrors,
+  };
 
   return (
     <Suspense fallback={<LoginFormFallback label={dict.common.loading} />}>

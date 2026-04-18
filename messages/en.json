@@ -121,7 +121,12 @@
       "signIn": "Sign in",
       "confirmInfo": "Account created. If email confirmation is enabled, check your inbox before signing in."
     },
-    "unexpected": "Unexpected error. Please try again."
+    "unexpected": "Unexpected error. Please try again.",
+    "loginErrors": {
+      "authCallback": "We couldn’t finish signing you in from that link (expired, already used, or incomplete). Request a new confirmation email or sign in if your account is already active.",
+      "invalidCredentials": "Incorrect email or password. If you just signed up, open the confirmation link in your latest email first to activate your account, then try again — or check for typos.",
+      "emailNotConfirmed": "Your email isn’t confirmed yet. Click the link in your inbox (check spam), then sign in."
+    }
   },
   "dashboard": {
     "title": "Dashboard",

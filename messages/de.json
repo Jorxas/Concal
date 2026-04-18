@@ -121,7 +121,12 @@
       "signIn": "Anmelden",
       "confirmInfo": "Konto erstellt. Falls E-Mail-Bestätigung aktiv ist, prüfe dein Postfach vor dem Login."
     },
-    "unexpected": "Unerwarteter Fehler. Bitte erneut versuchen."
+    "unexpected": "Unerwarteter Fehler. Bitte erneut versuchen.",
+    "loginErrors": {
+      "authCallback": "Der Bestätigungslink konnte die Anmeldung nicht abschließen (abgelaufen, bereits verwendet oder unvollständig). Fordere eine neue E-Mail an oder melde dich an, falls dein Konto schon aktiv ist.",
+      "invalidCredentials": "E-Mail oder Passwort ist falsch. Wenn du dich gerade registriert hast, öffne zuerst den Link in der neuesten Bestätigungsmail, um das Konto zu aktivieren, und versuche es erneut — oder prüfe auf Tippfehler.",
+      "emailNotConfirmed": "Deine E-Mail ist noch nicht bestätigt. Klicke auf den Link in deinem Postfach (Spam prüfen) und melde dich danach an."
+    }
   },
   "dashboard": {
     "title": "Dashboard",
