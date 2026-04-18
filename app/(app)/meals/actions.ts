@@ -149,6 +149,8 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
 
   revalidatePath("/dashboard");
   revalidatePath("/meals/new");
+  revalidatePath(`/meals/${mealId}`);
+  revalidatePath("/profile");
   if (isPublic) {
     revalidatePath("/meals/explore");
   }
@@ -191,6 +193,8 @@ export async function toggleLikeMeal(mealId: string): Promise<ToggleSocialResult
       return { ok: false, error: delErr.message };
     }
     revalidatePath("/meals/explore");
+    revalidatePath(`/meals/${mealId}`);
+    revalidatePath("/profile");
     return { ok: true, active: false };
   }
 
@@ -202,6 +206,8 @@ export async function toggleLikeMeal(mealId: string): Promise<ToggleSocialResult
     return { ok: false, error: insErr.message };
   }
   revalidatePath("/meals/explore");
+  revalidatePath(`/meals/${mealId}`);
+  revalidatePath("/profile");
   return { ok: true, active: true };
 }
 
@@ -240,6 +246,8 @@ export async function toggleSaveMeal(mealId: string): Promise<ToggleSocialResult
       return { ok: false, error: delErr.message };
     }
     revalidatePath("/meals/explore");
+    revalidatePath(`/meals/${mealId}`);
+    revalidatePath("/profile");
     return { ok: true, active: false };
   }
 
@@ -251,5 +259,7 @@ export async function toggleSaveMeal(mealId: string): Promise<ToggleSocialResult
     return { ok: false, error: insErr.message };
   }
   revalidatePath("/meals/explore");
+  revalidatePath(`/meals/${mealId}`);
+  revalidatePath("/profile");
   return { ok: true, active: true };
 }

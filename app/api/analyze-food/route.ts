@@ -140,7 +140,6 @@ export async function POST(request: Request) {
       e && typeof e === "object" && "message" in e
         ? String((e as { message: unknown }).message)
         : "Erreur Google Gemini.";
-    console.error("[analyze-food]", message);
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }

@@ -1,10 +1,12 @@
+import { AppShell } from "@/components/layout/app-shell";
+
 /**
- * Authenticated route group shell. Add shared chrome (nav, sidebar) here later.
+ * Coque des pages authentifiées : barre latérale + navigation mobile.
  */
 export default function AppRouteGroupLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return <AppShell>{children}</AppShell>;
 }

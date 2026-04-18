@@ -26,9 +26,11 @@ export async function updateSession(
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !anonKey) {
-    console.error(
-      "[concal] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.",
-    );
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "[concal] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+      );
+    }
     if (options?.isProtectedPath?.(request.nextUrl.pathname)) {
       const fallback = request.nextUrl.clone();
       fallback.pathname = "/login";

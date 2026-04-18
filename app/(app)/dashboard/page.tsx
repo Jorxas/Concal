@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   const today = format(new Date(), "yyyy-MM-dd");
   const dateLabel = format(new Date(), "EEEE d MMMM yyyy", { locale: fr });
 
-  const { data: goalRow, error: goalError } = await supabase
+  const { data: goalRow } = await supabase
     .from("user_goals")
     .select(
       "target_calories, target_protein_g, target_carbs_g, target_fat_g, effective_from",
@@ -40,19 +40,11 @@ export default async function DashboardPage() {
     .limit(1)
     .maybeSingle();
 
-  if (goalError) {
-    console.error("[dashboard] user_goals", goalError.message);
-  }
-
-  const { data: logRows, error: logsError } = await supabase
+  const { data: logRows } = await supabase
     .from("meal_logs")
     .select("calories, protein_g, carbs_g, fat_g")
     .eq("user_id", user.id)
     .eq("logged_on", today);
-
-  if (logsError) {
-    console.error("[dashboard] meal_logs", logsError.message);
-  }
 
   const consumed = (logRows ?? []).reduce(
     (acc, row) => ({
