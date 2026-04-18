@@ -1,19 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { createMeal } from "@/app/(app)/meals/actions";
 import type { AnalyzeFoodResponse } from "@/lib/validations/analyze-food-response";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,12 +18,69 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Camera, Loader2Icon, Sparkles } from "lucide-react";
+import { Camera, ImagePlus, Loader2Icon, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const INGREDIENTS_PLACEHOLDER = `[
-  { "name": "Avocat", "amount": "1", "unit": "pcs" },
-  { "name": "Œufs", "amount": "2", "unit": "pcs" }
+  { "name": "Avocado", "amount": "1", "unit": "pcs" },
+  { "name": "Eggs", "amount": "2", "unit": "pcs" }
 ]`;
+
+export type MealFormDict = {
+  sectionPhoto: string;
+  sectionPhotoHelp: string;
+  sectionDetails: string;
+  sectionDetailsHelp: string;
+  sectionMacros: string;
+  sectionMacrosHelp: string;
+  aiButton: string;
+  aiAnalyzing: string;
+  aiBadge: string;
+  aiHint: string;
+  aiLoading: string;
+  aiFilled: string;
+  aiFail: string;
+  aiNetwork: string;
+  pickPhotoFirst: string;
+  publicLabel: string;
+  publicHelp: string;
+  submit: string;
+  submitLoading: string;
+  savingMeal: string;
+  mealSaved: string;
+  mealNetwork: string;
+  titleLabel: string;
+  titlePlaceholder: string;
+  descriptionLabel: string;
+  descriptionPlaceholder: string;
+  instructionsLabel: string;
+  instructionsPlaceholder: string;
+  ingredientsLabel: string;
+  ingredientsHelp: string;
+  categoryLabel: string;
+  difficultyLabel: string;
+  photoLabel: string;
+  dropHint: string;
+  caloriesLabel: string;
+  proteinLabel: string;
+  carbsLabel: string;
+  fatLabel: string;
+  cancel: string;
+  category: {
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+    snack: string;
+    dessert: string;
+    drink: string;
+    other: string;
+  };
+  difficulty: {
+    easy: string;
+    medium: string;
+    hard: string;
+  };
+};
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -41,7 +91,7 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
-export function MealUploadForm() {
+export function MealUploadForm({ dict }: { dict: MealFormDict }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [aiPending, setAiPending] = useState(false);
@@ -64,26 +114,19 @@ export function MealUploadForm() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0] ?? null;
       setSelectedFile(file);
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-      if (file) {
-        setPreviewUrl(URL.createObjectURL(file));
-      } else {
-        setPreviewUrl(null);
-      }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(file ? URL.createObjectURL(file) : null);
     },
     [previewUrl],
   );
 
   async function runAiAnalysis() {
     if (!selectedFile) {
-      toast.error("Choisis d’abord une photo.");
+      toast.error(dict.pickPhotoFirst);
       return;
     }
-
     setAiPending(true);
-    const toastId = toast.loading("L’IA analyse votre assiette…");
+    const toastId = toast.loading(dict.aiLoading);
     try {
       const dataUrl = await readFileAsDataUrl(selectedFile);
       const res = await fetch("/api/analyze-food", {
@@ -100,7 +143,7 @@ export function MealUploadForm() {
           "error" in body &&
           typeof (body as { error: unknown }).error === "string"
             ? (body as { error: string }).error
-            : "Analyse impossible.";
+            : dict.aiFail;
         toast.error(msg, { id: toastId });
         return;
       }
@@ -113,10 +156,9 @@ export function MealUploadForm() {
       setProtein(String(d.protein));
       setCarbs(String(d.carbs));
       setFat(String(d.fat));
-
-      toast.success("Champs remplis à partir de la photo.", { id: toastId });
+      toast.success(dict.aiFilled, { id: toastId });
     } catch {
-      toast.error("Erreur réseau pendant l’analyse.", { id: toastId });
+      toast.error(dict.aiNetwork, { id: toastId });
     } finally {
       setAiPending(false);
     }
@@ -124,7 +166,6 @@ export function MealUploadForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
     const fd = new FormData();
     fd.append("title", title);
     fd.append("description", description);
@@ -136,13 +177,10 @@ export function MealUploadForm() {
     fd.append("protein_g_per_serving", protein);
     fd.append("carbs_g_per_serving", carbs);
     fd.append("fat_g_per_serving", fat);
-    if (selectedFile) {
-      fd.append("image", selectedFile);
-    }
+    if (selectedFile) fd.append("image", selectedFile);
     fd.append("is_public", isPublic ? "true" : "false");
 
-    const toastId = toast.loading("Enregistrement du repas et envoi de l’image…");
-
+    const toastId = toast.loading(dict.savingMeal);
     setPending(true);
     try {
       const result = await createMeal(fd);
@@ -150,13 +188,11 @@ export function MealUploadForm() {
         toast.error(result.error, { id: toastId });
         return;
       }
-      toast.success("Repas enregistré et ajouté au journal du jour.", {
-        id: toastId,
-      });
+      toast.success(dict.mealSaved, { id: toastId });
       router.push("/dashboard");
       router.refresh();
     } catch {
-      toast.error("Une erreur réseau est survenue.", { id: toastId });
+      toast.error(dict.mealNetwork, { id: toastId });
     } finally {
       setPending(false);
     }
@@ -165,55 +201,119 @@ export function MealUploadForm() {
   const disableForm = pending || aiPending;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Enregistrer un repas</CardTitle>
-        <CardDescription>
-          Ajoute une photo, utilise l’optionnellement avec l’IA pour préremplir les
-          champs, puis ajuste et enregistre.
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit} className="contents">
-        <CardContent className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <FormSection
+        title={dict.sectionPhoto}
+        help={dict.sectionPhotoHelp}
+      >
+        <label
+          htmlFor="meal-image"
+          className={cn(
+            "group relative flex aspect-[16/10] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border/70 bg-muted/30 text-center transition-colors hover:border-primary/60 hover:bg-primary/5",
+            previewUrl && "border-solid border-border/60 bg-transparent",
+          )}
+        >
+          {previewUrl ? (
+            <Image
+              src={previewUrl}
+              alt=""
+              fill
+              unoptimized
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 640px"
+            />
+          ) : (
+            <div className="flex flex-col items-center gap-2 p-6 text-muted-foreground">
+              <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <ImagePlus className="size-6" aria-hidden />
+              </span>
+              <p className="text-sm font-medium text-foreground">
+                {dict.photoLabel}
+              </p>
+              <p className="text-xs">{dict.dropHint}</p>
+            </div>
+          )}
+          <input
+            id="meal-image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            disabled={disableForm}
+            onChange={onImageChange}
+            className="sr-only"
+          />
+        </label>
+
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            disabled={disableForm || !selectedFile}
+            onClick={runAiAnalysis}
+            className="h-11 gap-2 rounded-full px-5 text-sm"
+          >
+            {aiPending ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" aria-hidden />
+                {dict.aiAnalyzing}
+              </>
+            ) : (
+              <>
+                <Sparkles className="size-4" aria-hidden />
+                {dict.aiButton}
+              </>
+            )}
+            <span className="ml-1 rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[10px] font-semibold tracking-wide">
+              {dict.aiBadge}
+            </span>
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            <Camera className="mr-1 inline size-3.5 align-text-bottom" aria-hidden />
+            {dict.aiHint}
+          </p>
+        </div>
+      </FormSection>
+
+      <FormSection
+        title={dict.sectionDetails}
+        help={dict.sectionDetailsHelp}
+      >
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="meal-title">Titre</Label>
+            <Label htmlFor="meal-title">{dict.titleLabel}</Label>
             <Input
               id="meal-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
               maxLength={200}
-              placeholder="Ex. Bowl riz + poulet"
+              placeholder={dict.titlePlaceholder}
               disabled={disableForm}
+              className="h-11"
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="meal-description">Description</Label>
+            <Label htmlFor="meal-description">{dict.descriptionLabel}</Label>
             <Textarea
               id="meal-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              placeholder="Notes rapides, contexte…"
+              placeholder={dict.descriptionPlaceholder}
               disabled={disableForm}
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="meal-instructions">Préparation (optionnel)</Label>
+            <Label htmlFor="meal-instructions">{dict.instructionsLabel}</Label>
             <Textarea
               id="meal-instructions"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               rows={3}
-              placeholder="Étapes de la recette…"
+              placeholder={dict.instructionsPlaceholder}
               disabled={disableForm}
             />
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="meal-ingredients">Ingrédients (JSON)</Label>
+            <Label htmlFor="meal-ingredients">{dict.ingredientsLabel}</Label>
             <Textarea
               id="meal-ingredients"
               value={ingredients}
@@ -224,202 +324,183 @@ export function MealUploadForm() {
               className="font-mono text-xs md:text-sm"
             />
             <p className="text-xs text-muted-foreground">
-              Tableau d’objets avec au minimum <code className="rounded bg-muted px-1">name</code> ;{" "}
-              <code className="rounded bg-muted px-1">amount</code> et{" "}
-              <code className="rounded bg-muted px-1">unit</code> sont optionnels. Laisser vide
-              pour aucun ingrédient.
+              {dict.ingredientsHelp}
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Catégorie</Label>
+              <Label>{dict.categoryLabel}</Label>
               <Select
                 value={category}
                 onValueChange={(v) => setCategory(v ?? "lunch")}
                 disabled={disableForm}
               >
-                <SelectTrigger className="w-full min-w-0" size="default">
+                <SelectTrigger className="h-11 w-full min-w-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="breakfast">Petit-déjeuner</SelectItem>
-                  <SelectItem value="lunch">Déjeuner</SelectItem>
-                  <SelectItem value="dinner">Dîner</SelectItem>
-                  <SelectItem value="snack">Collation</SelectItem>
-                  <SelectItem value="dessert">Dessert</SelectItem>
-                  <SelectItem value="drink">Boisson</SelectItem>
-                  <SelectItem value="other">Autre</SelectItem>
+                  <SelectItem value="breakfast">{dict.category.breakfast}</SelectItem>
+                  <SelectItem value="lunch">{dict.category.lunch}</SelectItem>
+                  <SelectItem value="dinner">{dict.category.dinner}</SelectItem>
+                  <SelectItem value="snack">{dict.category.snack}</SelectItem>
+                  <SelectItem value="dessert">{dict.category.dessert}</SelectItem>
+                  <SelectItem value="drink">{dict.category.drink}</SelectItem>
+                  <SelectItem value="other">{dict.category.other}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Difficulté</Label>
+              <Label>{dict.difficultyLabel}</Label>
               <Select
                 value={difficulty}
                 onValueChange={(v) => setDifficulty(v ?? "easy")}
                 disabled={disableForm}
               >
-                <SelectTrigger className="w-full min-w-0">
+                <SelectTrigger className="h-11 w-full min-w-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="easy">Facile</SelectItem>
-                  <SelectItem value="medium">Moyen</SelectItem>
-                  <SelectItem value="hard">Difficile</SelectItem>
+                  <SelectItem value="easy">{dict.difficulty.easy}</SelectItem>
+                  <SelectItem value="medium">{dict.difficulty.medium}</SelectItem>
+                  <SelectItem value="hard">{dict.difficulty.hard}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="meal-image">Photo (optionnel)</Label>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Input
-                id="meal-image"
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                disabled={disableForm}
-                onChange={onImageChange}
-                className="cursor-pointer sm:max-w-xs"
-              />
-              {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Aperçu du repas"
-                  className="h-24 w-24 rounded-lg border object-cover"
-                />
-              ) : (
-                <div className="flex size-24 shrink-0 items-center justify-center rounded-lg border border-dashed bg-muted/40 text-muted-foreground">
-                  <Camera className="size-8" aria-hidden />
-                </div>
-              )}
-            </div>
-            {selectedFile ? (
-              <Button
-                type="button"
-                variant="secondary"
-                className="w-full sm:w-auto"
-                disabled={disableForm}
-                onClick={runAiAnalysis}
-              >
-                {aiPending ? (
-                  <>
-                    <Loader2Icon className="size-4 animate-spin" aria-hidden />
-                    L’IA analyse votre assiette…
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="size-4" aria-hidden />
-                    Analyser avec l’IA
-                  </>
-                )}
-              </Button>
-            ) : null}
-          </div>
-
-          <div className="flex flex-col gap-3 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border/60 bg-card p-4">
             <div className="space-y-1">
-              <Label htmlFor="meal-public">Publier publiquement</Label>
-              <p className="text-xs text-muted-foreground">
-                Si activé, le repas apparaîtra dans « Découvrir des repas » pour les autres
-                utilisateurs.
-              </p>
+              <Label htmlFor="meal-public" className="font-medium">
+                {dict.publicLabel}
+              </Label>
+              <p className="text-xs text-muted-foreground">{dict.publicHelp}</p>
             </div>
             <Switch
               id="meal-public"
               checked={isPublic}
               onCheckedChange={setIsPublic}
               disabled={disableForm}
-              aria-label="Publier ce repas sur le fil d’exploration"
             />
           </div>
+        </div>
+      </FormSection>
 
-          <fieldset className="space-y-3 rounded-lg border border-border p-4">
-            <legend className="px-1 text-sm font-medium">
-              Macros (par portion, manuel ou prérempli par l’IA)
-            </legend>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="calories_per_serving">Calories (kcal)</Label>
-                <Input
-                  id="calories_per_serving"
-                  type="number"
-                  min={1}
-                  max={20000}
-                  step={1}
-                  required
-                  value={calories}
-                  onChange={(e) => setCalories(e.target.value)}
-                  disabled={disableForm}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="protein_g_per_serving">Protéines (g)</Label>
-                <Input
-                  id="protein_g_per_serving"
-                  type="number"
-                  min={0}
-                  max={2000}
-                  step={0.1}
-                  required
-                  value={protein}
-                  onChange={(e) => setProtein(e.target.value)}
-                  disabled={disableForm}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="carbs_g_per_serving">Glucides (g)</Label>
-                <Input
-                  id="carbs_g_per_serving"
-                  type="number"
-                  min={0}
-                  max={2000}
-                  step={0.1}
-                  required
-                  value={carbs}
-                  onChange={(e) => setCarbs(e.target.value)}
-                  disabled={disableForm}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="fat_g_per_serving">Lipides (g)</Label>
-                <Input
-                  id="fat_g_per_serving"
-                  type="number"
-                  min={0}
-                  max={2000}
-                  step={0.1}
-                  required
-                  value={fat}
-                  onChange={(e) => setFat(e.target.value)}
-                  disabled={disableForm}
-                />
-              </div>
-            </div>
-          </fieldset>
-        </CardContent>
-        <CardFooter className="flex flex-wrap gap-2 border-t bg-muted/30">
-          <Button type="submit" disabled={disableForm}>
-            {pending ? (
-              <>
-                <Loader2Icon className="size-4 animate-spin" aria-hidden />
-                Enregistrement…
-              </>
-            ) : (
-              "Enregistrer le repas"
-            )}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={disableForm}
-            onClick={() => router.push("/dashboard")}
-          >
-            Annuler
-          </Button>
-        </CardFooter>
-      </form>
-    </Card>
+      <FormSection
+        title={dict.sectionMacros}
+        help={dict.sectionMacrosHelp}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="calories_per_serving">{dict.caloriesLabel}</Label>
+            <Input
+              id="calories_per_serving"
+              type="number"
+              min={1}
+              max={20000}
+              step={1}
+              required
+              value={calories}
+              onChange={(e) => setCalories(e.target.value)}
+              disabled={disableForm}
+              className="h-11"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="protein_g_per_serving">{dict.proteinLabel}</Label>
+            <Input
+              id="protein_g_per_serving"
+              type="number"
+              min={0}
+              max={2000}
+              step={0.1}
+              required
+              value={protein}
+              onChange={(e) => setProtein(e.target.value)}
+              disabled={disableForm}
+              className="h-11"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="carbs_g_per_serving">{dict.carbsLabel}</Label>
+            <Input
+              id="carbs_g_per_serving"
+              type="number"
+              min={0}
+              max={2000}
+              step={0.1}
+              required
+              value={carbs}
+              onChange={(e) => setCarbs(e.target.value)}
+              disabled={disableForm}
+              className="h-11"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="fat_g_per_serving">{dict.fatLabel}</Label>
+            <Input
+              id="fat_g_per_serving"
+              type="number"
+              min={0}
+              max={2000}
+              step={0.1}
+              required
+              value={fat}
+              onChange={(e) => setFat(e.target.value)}
+              disabled={disableForm}
+              className="h-11"
+            />
+          </div>
+        </div>
+      </FormSection>
+
+      <div className="flex flex-wrap gap-3 border-t border-border/60 pt-6">
+        <Button
+          type="submit"
+          disabled={disableForm}
+          className="h-11 rounded-full px-6 text-sm shadow-sm"
+        >
+          {pending ? (
+            <>
+              <Loader2Icon className="size-4 animate-spin" aria-hidden />
+              {dict.submitLoading}
+            </>
+          ) : (
+            dict.submit
+          )}
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={disableForm}
+          className="h-11 rounded-full px-5"
+          onClick={() => router.push("/dashboard")}
+        >
+          {dict.cancel}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function FormSection({
+  title,
+  help,
+  children,
+}: {
+  title: string;
+  help?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm md:p-7">
+      <header className="mb-5">
+        <h2 className="font-heading text-xl tracking-tight">{title}</h2>
+        {help ? (
+          <p className="mt-1 text-sm text-muted-foreground">{help}</p>
+        ) : null}
+      </header>
+      {children}
+    </section>
   );
 }

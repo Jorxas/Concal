@@ -1,0 +1,251 @@
+{
+  "common": {
+    "brand": "Concal",
+    "tagline": "KI-gestütztes Kalorien-Tracking",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "loading": "Lädt…",
+    "back": "Zurück",
+    "signOut": "Abmelden",
+    "comingSoon": "Demnächst",
+    "language": "Sprache",
+    "kcal": "kcal",
+    "grams": "g",
+    "perServing": "pro Portion",
+    "openDashboard": "Zum Dashboard",
+    "getStarted": "Loslegen",
+    "learnMore": "Mehr erfahren",
+    "private": "Privat",
+    "public": "Öffentlich",
+    "optional": "optional",
+    "required": "erforderlich"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "explore": "Entdecken",
+    "newMeal": "Neue Mahlzeit",
+    "profile": "Profil",
+    "primary": "Hauptnavigation"
+  },
+  "landing": {
+    "eyebrow": "Ernährung · Community",
+    "heroTitle": "KI-gestütztes Kalorien-Tracking und soziales Rezept-Sharing.",
+    "heroSubtitle": "Fotografiere deinen Teller, lass die KI die Makros schätzen, setze dir Tagesziele und entdecke Rezepte einer leidenschaftlichen Community.",
+    "heroCtaPrimary": "Loslegen",
+    "heroCtaSecondary": "Ich habe bereits ein Konto",
+    "heroCtaSignedIn": "Zum Dashboard",
+    "trustStrip": "Gebaut mit",
+    "trust": {
+      "ai": "Gemini AI",
+      "db": "Supabase",
+      "fw": "Next.js 16"
+    },
+    "featuresEyebrow": "Funktionen",
+    "featuresTitle": "Alles was du brauchst, nichts Überflüssiges.",
+    "features": {
+      "ai": {
+        "title": "KI für deinen Teller",
+        "body": "Ein Foto genügt. Gemini schätzt Kalorien, Makros und schlägt sogar Titel und Zutaten vor.",
+        "badge": "Gemini"
+      },
+      "dashboard": {
+        "title": "Ein Dashboard, das mit dir spricht",
+        "body": "Tagesziele, Makros und ein klarer Fortschrittsring. Keine Tabellen, kein Lärm.",
+        "badge": "Fokus"
+      },
+      "social": {
+        "title": "Ein herzlicher Community-Feed",
+        "body": "Teile deine Rezepte, speichere die Besten, like, inspiriere — nichts zu beweisen, alles zu teilen.",
+        "badge": "Social"
+      }
+    },
+    "how": {
+      "eyebrow": "So funktioniert's",
+      "title": "Vom Foto zum Fortschritt in 3 Schritten.",
+      "step1": {
+        "title": "Foto wählen",
+        "body": "Ziehe ein Bild deiner Mahlzeit hinein oder wähle es direkt vom Smartphone."
+      },
+      "step2": {
+        "title": "Lass die KI rechnen",
+        "body": "Gemini füllt Kalorien und Makros aus. Du passt bei Bedarf an."
+      },
+      "step3": {
+        "title": "Tracken und teilen",
+        "body": "Alles landet auf deinem Dashboard. Öffentlich teilen, um die Community zu inspirieren."
+      }
+    },
+    "cta": {
+      "title": "Iss ab heute smarter.",
+      "body": "Kostenlos während der Beta. Keine Karte nötig.",
+      "button": "Kostenloses Konto erstellen"
+    },
+    "footer": {
+      "madeWith": "Gebaut mit Next.js, Supabase und Gemini.",
+      "legal": "© {year} Concal. Alle Rechte vorbehalten."
+    },
+    "header": {
+      "signIn": "Anmelden",
+      "signUp": "Registrieren",
+      "app": "App öffnen"
+    }
+  },
+  "auth": {
+    "panel": {
+      "quote": "„Concal hat meine Mahlzeiten in Daten verwandelt, die ich wirklich verstehe.“",
+      "quoteAuthor": "— Eine glückliche Beta-Nutzerin",
+      "bullet1": "Kalorien per Foto erfassen",
+      "bullet2": "Persönliche Tagesziele",
+      "bullet3": "Ein Rezept-Feed zum Stöbern"
+    },
+    "login": {
+      "title": "Willkommen zurück",
+      "subtitle": "Melde dich an, um zu deinem Dashboard zu gelangen.",
+      "emailLabel": "E-Mail",
+      "passwordLabel": "Passwort",
+      "submit": "Anmelden",
+      "submitLoading": "Anmelden…",
+      "noAccount": "Noch kein Konto?",
+      "register": "Jetzt erstellen"
+    },
+    "register": {
+      "title": "Konto erstellen",
+      "subtitle": "Zwei Minuten für besseres Essen.",
+      "nameLabel": "Anzeigename",
+      "emailLabel": "E-Mail",
+      "passwordLabel": "Passwort",
+      "confirmPasswordLabel": "Passwort bestätigen",
+      "submit": "Konto erstellen",
+      "submitLoading": "Erstelle…",
+      "haveAccount": "Schon registriert?",
+      "signIn": "Anmelden",
+      "confirmInfo": "Konto erstellt. Falls E-Mail-Bestätigung aktiv ist, prüfe dein Postfach vor dem Login."
+    },
+    "unexpected": "Unerwarteter Fehler. Bitte erneut versuchen."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Dein heutiger Tag auf einen Blick.",
+    "todayLabel": "Heute",
+    "editGoal": "Ziele bearbeiten",
+    "setGoal": "Ziele festlegen",
+    "welcomeTitle": "Willkommen bei Concal.",
+    "welcomeBody": "Lege deine Tagesziele fest, um das gesamte Dashboard freizuschalten.",
+    "logMeal": "Mahlzeit erfassen",
+    "consumed": "Konsumiert",
+    "remaining": "Verbleibend",
+    "over": "Darüber",
+    "macros": "Makros",
+    "macrosSubtitle": "Fortschritt gegenüber deinen Tageszielen.",
+    "calories": "Kalorien",
+    "protein": "Protein",
+    "carbs": "Kohlenhydrate",
+    "fat": "Fett",
+    "goal": {
+      "title": "Tagesziele",
+      "subtitle": "Lege deine Ziele für heute fest. Du kannst sie jederzeit anpassen.",
+      "caloriesLabel": "Kalorien (kcal)",
+      "proteinLabel": "Protein (g)",
+      "carbsLabel": "Kohlenhydrate (g)",
+      "fatLabel": "Fett (g)",
+      "saving": "Speichere…"
+    }
+  },
+  "meals": {
+    "explore": {
+      "title": "Entdecken",
+      "subtitle": "Rezepte aus der Community.",
+      "empty": "Noch keine öffentliche Mahlzeit. Veröffentliche deine über „Neue Mahlzeit“."
+    },
+    "new": {
+      "title": "Neue Mahlzeit",
+      "subtitle": "Fülle das Formular aus oder lass die KI arbeiten.",
+      "sectionPhoto": "Foto & KI",
+      "sectionPhotoHelp": "Ein Foto reicht der KI, um Kalorien und Makros zu schätzen.",
+      "sectionDetails": "Details",
+      "sectionDetailsHelp": "Name, Beschreibung und Zutaten.",
+      "sectionMacros": "Makros",
+      "sectionMacrosHelp": "Pro Portion, anpassbar falls die KI daneben liegt.",
+      "aiButton": "Mit KI analysieren",
+      "aiAnalyzing": "Analysiere…",
+      "aiBadge": "Gemini",
+      "aiHint": "Ein Foto genügt.",
+      "aiLoading": "KI analysiert deinen Teller…",
+      "aiFilled": "Felder aus dem Foto befüllt.",
+      "aiFail": "Analyse nicht möglich.",
+      "aiNetwork": "Netzwerkfehler während der Analyse.",
+      "pickPhotoFirst": "Wähle zuerst ein Foto.",
+      "publicLabel": "Diese Mahlzeit öffentlich machen",
+      "publicHelp": "Öffentliche Mahlzeiten erscheinen in „Entdecken“.",
+      "submit": "Mahlzeit speichern",
+      "submitLoading": "Speichere…",
+      "savingMeal": "Mahlzeit wird gespeichert und Bild hochgeladen…",
+      "mealSaved": "Mahlzeit gespeichert und zum heutigen Log hinzugefügt.",
+      "mealNetwork": "Ein Netzwerkfehler ist aufgetreten.",
+      "titleLabel": "Titel",
+      "titlePlaceholder": "z. B. Hähnchen-Reis-Bowl",
+      "descriptionLabel": "Beschreibung",
+      "descriptionPlaceholder": "Kurze Notizen, Kontext…",
+      "instructionsLabel": "Zubereitung",
+      "instructionsPlaceholder": "Schritte des Rezepts…",
+      "ingredientsLabel": "Zutaten (JSON)",
+      "ingredientsHelp": "Array von Objekten mit mindestens `name`. `amount` und `unit` sind optional.",
+      "categoryLabel": "Kategorie",
+      "difficultyLabel": "Schwierigkeit",
+      "photoLabel": "Foto",
+      "dropHint": "Bild hineinziehen oder anklicken",
+      "caloriesLabel": "Kalorien (kcal)",
+      "proteinLabel": "Protein (g)",
+      "carbsLabel": "Kohlenhydrate (g)",
+      "fatLabel": "Fett (g)",
+      "category": {
+        "breakfast": "Frühstück",
+        "lunch": "Mittagessen",
+        "dinner": "Abendessen",
+        "snack": "Snack",
+        "dessert": "Dessert",
+        "drink": "Getränk",
+        "other": "Sonstige"
+      },
+      "difficulty": {
+        "easy": "Einfach",
+        "medium": "Mittel",
+        "hard": "Schwer"
+      }
+    },
+    "detail": {
+      "back": "Zurück zum Feed",
+      "ingredients": "Zutaten",
+      "instructions": "Zubereitung",
+      "noImage": "Kein Bild"
+    },
+    "card": {
+      "noImage": "Kein Bild",
+      "like": "Gefällt mir",
+      "unlike": "Gefällt mir zurücknehmen",
+      "save": "Speichern",
+      "unsave": "Aus Favoriten entfernen"
+    }
+  },
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Statistiken und gespeicherte Rezepte.",
+    "editProfile": "Profil bearbeiten",
+    "stats": {
+      "meals": "Erstellte Mahlzeiten",
+      "public": "Öffentlich",
+      "saves": "Favoriten"
+    },
+    "saved": "Gespeicherte Rezepte",
+    "savedEmpty": "Noch keine gespeicherten Rezepte. Entdecke den Feed und markiere dein erstes.",
+    "mine": "Meine Rezepte",
+    "mineEmpty": "Du hast noch keine Mahlzeit erfasst."
+  },
+  "errors": {
+    "generic": "Etwas ist schief gelaufen.",
+    "retry": "Erneut versuchen",
+    "notFoundTitle": "Seite nicht gefunden",
+    "notFoundBody": "Diese Seite existiert nicht oder wurde verschoben.",
+    "goHome": "Zur Startseite"
+  }
+}

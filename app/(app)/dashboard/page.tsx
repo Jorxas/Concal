@@ -1,10 +1,11 @@
 import { format } from "date-fns";
-import { fr } from "date-fns/locale";
 import Link from "next/link";
-import { PlusCircle, UtensilsCrossed } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n/server";
+import { dateLocaleFor } from "@/lib/i18n/date";
 import { DashboardGoalsControls } from "@/components/dashboard/dashboard-goals-controls";
 import { DailyOverview } from "@/components/dashboard/daily-overview";
 import { MacroDisplay } from "@/components/dashboard/macro-display";
@@ -22,12 +23,15 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
+
+  const { dict, locale } = await getI18n();
+  const dateLocale = dateLocaleFor(locale);
 
   const today = format(new Date(), "yyyy-MM-dd");
-  const dateLabel = format(new Date(), "EEEE d MMMM yyyy", { locale: fr });
+  const dateLabel = format(new Date(), "EEEE d MMMM yyyy", {
+    locale: dateLocale,
+  });
 
   const { data: goalRow } = await supabase
     .from("user_goals")
@@ -65,32 +69,45 @@ export default async function DashboardPage() {
       }
     : null;
 
+  const controlsDict = {
+    welcomeTitle: dict.dashboard.welcomeTitle,
+    welcomeBody: dict.dashboard.welcomeBody,
+    setGoal: dict.dashboard.setGoal,
+    editGoal: dict.dashboard.editGoal,
+    goal: {
+      ...dict.dashboard.goal,
+      save: dict.common.save,
+      cancel: dict.common.cancel,
+    },
+  };
+
   return (
-    <div className="mx-auto w-full max-w-2xl flex-1 space-y-8 px-4 py-8">
-      <header className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <UtensilsCrossed className="size-5" aria-hidden />
-          </div>
-          <div>
-            <h1 className="font-heading text-2xl font-semibold tracking-tight">
-              Tableau de bord
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              Suis tes apports et tes objectifs du jour.
-            </p>
-          </div>
+    <div className="mx-auto w-full max-w-3xl flex-1 space-y-8 px-4 py-8 md:px-8 md:py-10">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-primary">
+            {dict.dashboard.todayLabel}
+          </p>
+          <h1 className="mt-1 font-heading text-3xl tracking-tight md:text-4xl">
+            {dict.dashboard.title}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {dict.dashboard.subtitle}
+          </p>
         </div>
         <Link
           href="/meals/new"
-          className={cn(buttonVariants(), "w-full gap-2 sm:w-auto")}
+          className={cn(
+            buttonVariants(),
+            "h-11 gap-2 self-start rounded-full px-5 text-sm shadow-sm sm:self-auto",
+          )}
         >
           <PlusCircle className="size-4" aria-hidden />
-          Enregistrer un repas
+          {dict.dashboard.logMeal}
         </Link>
       </header>
 
-      <DashboardGoalsControls currentGoal={currentGoal} />
+      <DashboardGoalsControls currentGoal={currentGoal} dict={controlsDict} />
 
       {currentGoal ? (
         <div className="space-y-6">
@@ -98,6 +115,11 @@ export default async function DashboardPage() {
             targetCalories={currentGoal.target_calories}
             consumedCalories={consumed.calories}
             dateLabel={dateLabel}
+            todayLabel={dict.dashboard.todayLabel}
+            consumedLabel={dict.dashboard.consumed}
+            remainingLabel={dict.dashboard.remaining}
+            overLabel={dict.dashboard.over}
+            kcalLabel={dict.common.kcal}
           />
           <MacroDisplay
             targets={{
@@ -107,6 +129,16 @@ export default async function DashboardPage() {
               fat: currentGoal.target_fat_g,
             }}
             consumed={consumed}
+            dict={{
+              title: dict.dashboard.macros,
+              subtitle: dict.dashboard.macrosSubtitle,
+              calories: dict.dashboard.calories,
+              protein: dict.dashboard.protein,
+              carbs: dict.dashboard.carbs,
+              fat: dict.dashboard.fat,
+              kcal: dict.common.kcal,
+              grams: dict.common.grams,
+            }}
           />
         </div>
       ) : null}

@@ -1,7 +1,6 @@
 "use client";
 
 import { Beef, Droplets, Flame, Wheat } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 
 export type MacroTargets = {
@@ -16,6 +15,17 @@ export type MacroConsumed = {
   protein: number;
   carbs: number;
   fat: number;
+};
+
+export type MacroDict = {
+  title: string;
+  subtitle: string;
+  calories: string;
+  protein: string;
+  carbs: string;
+  fat: string;
+  kcal: string;
+  grams: string;
 };
 
 function pct(consumed: number, target: number): number {
@@ -48,7 +58,10 @@ function MacroRow({
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-3 text-sm">
         <span className="flex min-w-0 items-center gap-2 font-medium">
-          <span className="shrink-0 text-muted-foreground" aria-hidden>
+          <span
+            className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+            aria-hidden
+          >
             {icon}
           </span>
           <span className="truncate">{label}</span>
@@ -57,10 +70,13 @@ function MacroRow({
           {consumedRounded} / {targetRounded} {unit}
         </span>
       </div>
-      <Progress
-        value={value}
-        aria-label={`${label} : ${value} pour cent de l’objectif journalier`}
-      />
+      <div className="h-2 overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full rounded-full bg-primary transition-[width] duration-500"
+          style={{ width: `${value}%` }}
+          aria-label={`${label}: ${value}%`}
+        />
+      </div>
     </div>
   );
 }
@@ -68,55 +84,63 @@ function MacroRow({
 type MacroDisplayProps = {
   targets: MacroTargets;
   consumed: MacroConsumed;
+  dict: MacroDict;
   className?: string;
 };
 
-/**
- * Affiche les quatre macros avec barres de progression (Shadcn Progress).
- */
-export function MacroDisplay({ targets, consumed, className }: MacroDisplayProps) {
+export function MacroDisplay({
+  targets,
+  consumed,
+  dict,
+  className,
+}: MacroDisplayProps) {
   return (
     <section
       className={cn(
-        "rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm",
+        "rounded-3xl border border-border/60 bg-card p-6 shadow-sm md:p-7",
         className,
       )}
       aria-labelledby="macros-heading"
     >
-      <h2 id="macros-heading" className="font-heading text-base font-semibold">
-        Macronutriments
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Progression par rapport à tes objectifs du jour.
-      </p>
-      <div className="mt-5 space-y-5">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2
+            id="macros-heading"
+            className="font-heading text-xl tracking-tight"
+          >
+            {dict.title}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">{dict.subtitle}</p>
+        </div>
+      </div>
+      <div className="mt-6 space-y-5">
         <MacroRow
-          label="Calories"
-          unit="kcal"
+          label={dict.calories}
+          unit={dict.kcal}
           consumed={consumed.calories}
           target={targets.calories}
-          icon={<Flame className="size-4" />}
+          icon={<Flame className="size-3.5" />}
         />
         <MacroRow
-          label="Protéines"
-          unit="g"
+          label={dict.protein}
+          unit={dict.grams}
           consumed={consumed.protein}
           target={targets.protein}
-          icon={<Beef className="size-4" />}
+          icon={<Beef className="size-3.5" />}
         />
         <MacroRow
-          label="Glucides"
-          unit="g"
+          label={dict.carbs}
+          unit={dict.grams}
           consumed={consumed.carbs}
           target={targets.carbs}
-          icon={<Wheat className="size-4" />}
+          icon={<Wheat className="size-3.5" />}
         />
         <MacroRow
-          label="Lipides"
-          unit="g"
+          label={dict.fat}
+          unit={dict.grams}
           consumed={consumed.fat}
           target={targets.fat}
-          icon={<Droplets className="size-4" />}
+          icon={<Droplets className="size-3.5" />}
         />
       </div>
     </section>

@@ -1,25 +1,32 @@
-/** Libellés FR pour les enums `meal_category` / `difficulty_level`. */
+type CategoryDict = Partial<Record<string, string>>;
+type DifficultyDict = Partial<Record<string, string>>;
 
-const CATEGORY_LABELS: Record<string, string> = {
-  breakfast: "Petit-déj.",
-  lunch: "Déjeuner",
-  dinner: "Dîner",
-  snack: "Collation",
+const FALLBACK_CATEGORY: Record<string, string> = {
+  breakfast: "Breakfast",
+  lunch: "Lunch",
+  dinner: "Dinner",
+  snack: "Snack",
   dessert: "Dessert",
-  drink: "Boisson",
-  other: "Autre",
+  drink: "Drink",
+  other: "Other",
 };
 
-const DIFFICULTY_LABELS: Record<string, string> = {
-  easy: "Facile",
-  medium: "Moyen",
-  hard: "Difficile",
+const FALLBACK_DIFFICULTY: Record<string, string> = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
 };
 
-export function mealCategoryLabel(category: string): string {
-  return CATEGORY_LABELS[category] ?? category;
+export function mealCategoryLabel(
+  category: string,
+  dict?: CategoryDict,
+): string {
+  return dict?.[category] ?? FALLBACK_CATEGORY[category] ?? category;
 }
 
-export function mealDifficultyLabel(difficulty: string): string {
-  return DIFFICULTY_LABELS[difficulty] ?? difficulty;
+export function mealDifficultyLabel(
+  difficulty: string,
+  dict?: DifficultyDict,
+): string {
+  return dict?.[difficulty] ?? FALLBACK_DIFFICULTY[difficulty] ?? difficulty;
 }

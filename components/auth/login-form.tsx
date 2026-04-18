@@ -6,20 +6,23 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getSafeReturnPath } from "@/lib/auth/return-path";
 import { loginSchema } from "@/lib/validations/auth";
-import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
-export function LoginForm() {
+export type LoginFormDict = {
+  title: string;
+  subtitle: string;
+  emailLabel: string;
+  passwordLabel: string;
+  submit: string;
+  submitLoading: string;
+  noAccount: string;
+  register: string;
+  unexpected: string;
+};
+
+export function LoginForm({ dict }: { dict: LoginFormDict }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = useMemo(
@@ -69,88 +72,95 @@ export function LoginForm() {
       router.push(returnTo);
       router.refresh();
     } catch {
-      setFormError("Une erreur inattendue s’est produite. Réessaie.");
+      setFormError(dict.unexpected);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Connexion</CardTitle>
-        <CardDescription>
-          Connecte-toi pour accéder à ton tableau de bord.
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={onSubmit}>
-        <CardContent className="space-y-4">
-          {formError ? (
-            <p
-              className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
-              role="alert"
-            >
-              {formError}
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <h1 className="font-heading text-4xl tracking-tight md:text-5xl">
+          {dict.title}
+        </h1>
+        <p className="text-muted-foreground">{dict.subtitle}</p>
+      </div>
+
+      <form onSubmit={onSubmit} className="space-y-4">
+        {formError ? (
+          <p
+            className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+            role="alert"
+          >
+            {formError}
+          </p>
+        ) : null}
+
+        <div className="space-y-2">
+          <Label htmlFor="login-email">{dict.emailLabel}</Label>
+          <Input
+            id="login-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            className="h-11"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            aria-invalid={Boolean(fieldErrors.email)}
+            aria-describedby={
+              fieldErrors.email ? "login-email-error" : undefined
+            }
+          />
+          {fieldErrors.email ? (
+            <p id="login-email-error" className="text-sm text-destructive">
+              {fieldErrors.email}
             </p>
           ) : null}
-          <div className="space-y-2">
-            <Label htmlFor="login-email">E-mail</Label>
-            <Input
-              id="login-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              aria-invalid={Boolean(fieldErrors.email)}
-              aria-describedby={
-                fieldErrors.email ? "login-email-error" : undefined
-              }
-            />
-            {fieldErrors.email ? (
-              <p id="login-email-error" className="text-sm text-destructive">
-                {fieldErrors.email}
-              </p>
-            ) : null}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="login-password">Mot de passe</Label>
-            <Input
-              id="login-password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-              aria-invalid={Boolean(fieldErrors.password)}
-              aria-describedby={
-                fieldErrors.password ? "login-password-error" : undefined
-              }
-            />
-            {fieldErrors.password ? (
-              <p id="login-password-error" className="text-sm text-destructive">
-                {fieldErrors.password}
-              </p>
-            ) : null}
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Button type="submit" disabled={loading}>
-            {loading ? "Connexion…" : "Se connecter"}
-          </Button>
-          <Link
-            href="/register"
-            className={cn(
-              buttonVariants({ variant: "link" }),
-              "h-auto px-0 text-center sm:text-right",
-            )}
-          >
-            Créer un compte
-          </Link>
-        </CardFooter>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="login-password">{dict.passwordLabel}</Label>
+          <Input
+            id="login-password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            className="h-11"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            aria-invalid={Boolean(fieldErrors.password)}
+            aria-describedby={
+              fieldErrors.password ? "login-password-error" : undefined
+            }
+          />
+          {fieldErrors.password ? (
+            <p id="login-password-error" className="text-sm text-destructive">
+              {fieldErrors.password}
+            </p>
+          ) : null}
+        </div>
+
+        <Button
+          type="submit"
+          disabled={loading}
+          className="h-11 w-full rounded-full text-sm font-medium"
+        >
+          {loading ? dict.submitLoading : dict.submit}
+        </Button>
       </form>
-    </Card>
+
+      <p className="text-center text-sm text-muted-foreground">
+        {dict.noAccount}{" "}
+        <Link
+          href="/register"
+          className="font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {dict.register}
+        </Link>
+      </p>
+    </div>
   );
 }

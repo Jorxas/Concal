@@ -1,0 +1,251 @@
+{
+  "common": {
+    "brand": "Concal",
+    "tagline": "AI-powered calorie tracking",
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "back": "Back",
+    "signOut": "Sign out",
+    "comingSoon": "Coming soon",
+    "language": "Language",
+    "kcal": "kcal",
+    "grams": "g",
+    "perServing": "per serving",
+    "openDashboard": "Open dashboard",
+    "getStarted": "Get started",
+    "learnMore": "Learn more",
+    "private": "Private",
+    "public": "Public",
+    "optional": "optional",
+    "required": "required"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "explore": "Explore",
+    "newMeal": "New meal",
+    "profile": "Profile",
+    "primary": "Main navigation"
+  },
+  "landing": {
+    "eyebrow": "Nutrition · Community",
+    "heroTitle": "AI-powered calorie tracking and social recipe sharing.",
+    "heroSubtitle": "Snap a photo of your plate, let AI estimate the macros, set your goals and discover recipes shared by a passionate community.",
+    "heroCtaPrimary": "Get started",
+    "heroCtaSecondary": "I already have an account",
+    "heroCtaSignedIn": "Open dashboard",
+    "trustStrip": "Built with",
+    "trust": {
+      "ai": "Gemini AI",
+      "db": "Supabase",
+      "fw": "Next.js 16"
+    },
+    "featuresEyebrow": "Features",
+    "featuresTitle": "Everything you need, nothing you don't.",
+    "features": {
+      "ai": {
+        "title": "AI vision for your plate",
+        "body": "A single photo is enough. Gemini estimates calories, macros and even suggests a title and ingredients.",
+        "badge": "Gemini"
+      },
+      "dashboard": {
+        "title": "A dashboard that speaks to you",
+        "body": "Daily goals, macros and a readable progress ring. No spreadsheets, no noise.",
+        "badge": "Focus"
+      },
+      "social": {
+        "title": "A warm community feed",
+        "body": "Publish your recipes, save the ones you love, like, follow — nothing to prove, everything to share.",
+        "badge": "Social"
+      }
+    },
+    "how": {
+      "eyebrow": "How it works",
+      "title": "From photo to progress in 3 steps.",
+      "step1": {
+        "title": "Snap or pick a photo",
+        "body": "Drag & drop or choose a picture of your meal directly from your phone."
+      },
+      "step2": {
+        "title": "Let AI do the math",
+        "body": "Gemini fills in calories and macros. Review and tweak if needed."
+      },
+      "step3": {
+        "title": "Track and share",
+        "body": "Everything lands on your dashboard. Make it public to inspire the community."
+      }
+    },
+    "cta": {
+      "title": "Start eating smarter today.",
+      "body": "Free during beta. No card required.",
+      "button": "Create a free account"
+    },
+    "footer": {
+      "madeWith": "Built with Next.js, Supabase and Gemini.",
+      "legal": "© {year} Concal. All rights reserved."
+    },
+    "header": {
+      "signIn": "Sign in",
+      "signUp": "Sign up",
+      "app": "Open app"
+    }
+  },
+  "auth": {
+    "panel": {
+      "quote": "“Concal turned my meals into data I actually understand.”",
+      "quoteAuthor": "— A happy beta user",
+      "bullet1": "Photo-based calorie capture",
+      "bullet2": "Personal daily goals",
+      "bullet3": "A recipe feed worth scrolling"
+    },
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to continue to your dashboard.",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Sign in",
+      "submitLoading": "Signing in…",
+      "noAccount": "No account yet?",
+      "register": "Create one"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Two minutes to join, lifetime of better meals.",
+      "nameLabel": "Display name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm password",
+      "submit": "Create account",
+      "submitLoading": "Creating…",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "confirmInfo": "Account created. If email confirmation is enabled, check your inbox before signing in."
+    },
+    "unexpected": "Unexpected error. Please try again."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Today at a glance.",
+    "todayLabel": "Today",
+    "editGoal": "Edit goals",
+    "setGoal": "Set my goals",
+    "welcomeTitle": "Welcome to Concal.",
+    "welcomeBody": "Set your daily goals to unlock the full dashboard.",
+    "logMeal": "Log a meal",
+    "consumed": "Consumed",
+    "remaining": "Remaining",
+    "over": "Over",
+    "macros": "Macros",
+    "macrosSubtitle": "Progress against your daily targets.",
+    "calories": "Calories",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "goal": {
+      "title": "Daily goals",
+      "subtitle": "Set your targets for today. You can edit them any time.",
+      "caloriesLabel": "Calories (kcal)",
+      "proteinLabel": "Protein (g)",
+      "carbsLabel": "Carbs (g)",
+      "fatLabel": "Fat (g)",
+      "saving": "Saving…"
+    }
+  },
+  "meals": {
+    "explore": {
+      "title": "Discover",
+      "subtitle": "Recipes from the community.",
+      "empty": "No public meal yet. Publish yours from “New meal.”"
+    },
+    "new": {
+      "title": "New meal",
+      "subtitle": "Fill it in, or let AI do the heavy lifting.",
+      "sectionPhoto": "Photo & AI",
+      "sectionPhotoHelp": "A picture is all the AI needs to estimate calories and macros.",
+      "sectionDetails": "Details",
+      "sectionDetailsHelp": "Name, description and ingredients.",
+      "sectionMacros": "Macros",
+      "sectionMacrosHelp": "Per serving, edit if the AI missed something.",
+      "aiButton": "Analyze with AI",
+      "aiAnalyzing": "Analyzing…",
+      "aiBadge": "Gemini",
+      "aiHint": "One photo is enough.",
+      "aiLoading": "AI is analyzing your plate…",
+      "aiFilled": "Fields filled from the photo.",
+      "aiFail": "Unable to analyze.",
+      "aiNetwork": "Network error during analysis.",
+      "pickPhotoFirst": "Pick a photo first.",
+      "publicLabel": "Make this meal public",
+      "publicHelp": "Public meals appear in Explore.",
+      "submit": "Save meal",
+      "submitLoading": "Saving…",
+      "savingMeal": "Saving meal and uploading image…",
+      "mealSaved": "Meal saved and added to today's log.",
+      "mealNetwork": "A network error occurred.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "e.g. Chicken & rice bowl",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Quick notes, context…",
+      "instructionsLabel": "Preparation",
+      "instructionsPlaceholder": "Steps of the recipe…",
+      "ingredientsLabel": "Ingredients (JSON)",
+      "ingredientsHelp": "Array of objects with at least `name`. `amount` and `unit` are optional.",
+      "categoryLabel": "Category",
+      "difficultyLabel": "Difficulty",
+      "photoLabel": "Photo",
+      "dropHint": "Drop an image or click to browse",
+      "caloriesLabel": "Calories (kcal)",
+      "proteinLabel": "Protein (g)",
+      "carbsLabel": "Carbs (g)",
+      "fatLabel": "Fat (g)",
+      "category": {
+        "breakfast": "Breakfast",
+        "lunch": "Lunch",
+        "dinner": "Dinner",
+        "snack": "Snack",
+        "dessert": "Dessert",
+        "drink": "Drink",
+        "other": "Other"
+      },
+      "difficulty": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      }
+    },
+    "detail": {
+      "back": "Back to feed",
+      "ingredients": "Ingredients",
+      "instructions": "Preparation",
+      "noImage": "No image"
+    },
+    "card": {
+      "noImage": "No image",
+      "like": "Like",
+      "unlike": "Remove like",
+      "save": "Save",
+      "unsave": "Remove from favorites"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Stats and saved recipes.",
+    "editProfile": "Edit profile",
+    "stats": {
+      "meals": "Meals created",
+      "public": "Public",
+      "saves": "Favorites"
+    },
+    "saved": "Saved recipes",
+    "savedEmpty": "No saved recipes yet. Explore the feed and bookmark one.",
+    "mine": "My recipes",
+    "mineEmpty": "You haven't logged any meal yet."
+  },
+  "errors": {
+    "generic": "Something went wrong.",
+    "retry": "Try again",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "This page doesn't exist or has moved.",
+    "goHome": "Back home"
+  }
+}

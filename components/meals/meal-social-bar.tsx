@@ -17,6 +17,12 @@ export type MealSocialBarProps = {
   initialLiked: boolean;
   initialSaved: boolean;
   className?: string;
+  labels: {
+    like: string;
+    unlike: string;
+    save: string;
+    unsave: string;
+  };
 };
 
 export function MealSocialBar({
@@ -24,6 +30,7 @@ export function MealSocialBar({
   initialLiked,
   initialSaved,
   className,
+  labels,
 }: MealSocialBarProps) {
   const router = useRouter();
   const [liked, setLiked] = useState(initialLiked);
@@ -48,7 +55,7 @@ export function MealSocialBar({
   return (
     <div
       className={cn(
-        "flex justify-end gap-1 border-t bg-muted/30 px-3 pt-3 pb-3",
+        "flex items-center justify-end gap-1 border-t border-border/60 bg-card/60 px-3 py-2",
         className,
       )}
     >
@@ -56,16 +63,19 @@ export function MealSocialBar({
         type="button"
         variant="ghost"
         size="icon"
-        className="text-muted-foreground hover:text-foreground"
+        className={cn(
+          "size-9 rounded-full text-muted-foreground transition-colors hover:text-foreground",
+          liked && "text-primary hover:text-primary",
+        )}
         disabled={pending}
         aria-pressed={liked}
-        aria-label={liked ? "Retirer le j’aime" : "J’aime"}
+        aria-label={liked ? labels.unlike : labels.like}
         onClick={() => runToggle(toggleLikeMeal, setLiked)}
       >
         <Heart
           className={cn(
-            "size-5 transition-colors",
-            liked && "fill-primary text-primary",
+            "size-[18px] transition-colors",
+            liked && "fill-primary",
           )}
         />
       </Button>
@@ -73,16 +83,19 @@ export function MealSocialBar({
         type="button"
         variant="ghost"
         size="icon"
-        className="text-muted-foreground hover:text-foreground"
+        className={cn(
+          "size-9 rounded-full text-muted-foreground transition-colors hover:text-foreground",
+          saved && "text-primary hover:text-primary",
+        )}
         disabled={pending}
         aria-pressed={saved}
-        aria-label={saved ? "Retirer des favoris" : "Enregistrer"}
+        aria-label={saved ? labels.unsave : labels.save}
         onClick={() => runToggle(toggleSaveMeal, setSaved)}
       >
         <Bookmark
           className={cn(
-            "size-5 transition-colors",
-            saved && "fill-primary text-primary",
+            "size-[18px] transition-colors",
+            saved && "fill-primary",
           )}
         />
       </Button>

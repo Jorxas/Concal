@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "@/app/(app)/actions";
 import {
   Compass,
   LayoutDashboard,
@@ -10,97 +9,126 @@ import {
   UserRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+import { Logo } from "@/components/marketing/logo";
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import { UserChip } from "@/components/layout/user-chip";
+import type { Locale } from "@/lib/i18n/config";
 
-const NAV = [
-  { href: "/dashboard", label: "Tableau de bord", icon: LayoutDashboard },
-  { href: "/meals/explore", label: "Découvrir", icon: Compass },
-  { href: "/meals/new", label: "Nouveau repas", icon: PlusCircle },
-  { href: "/profile", label: "Profil", icon: UserRound },
-] as const;
+export type NavDict = {
+  dashboard: string;
+  explore: string;
+  newMeal: string;
+  profile: string;
+  primary: string;
+  signOut: string;
+};
+
+type NavItem = {
+  key: "dashboard" | "explore" | "newMeal" | "profile";
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+};
+
+const NAV: readonly NavItem[] = [
+  { key: "dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { key: "explore", href: "/meals/explore", icon: Compass },
+  { key: "newMeal", href: "/meals/new", icon: PlusCircle },
+  { key: "profile", href: "/profile", icon: UserRound },
+];
 
 function isActive(pathname: string, href: string) {
-  if (href === "/dashboard") {
-    return pathname === "/dashboard";
-  }
+  if (href === "/dashboard") return pathname === "/dashboard";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-type NavLinkProps = {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  pathname: string;
-  compact?: boolean;
+type AppNavigationProps = {
+  dict: NavDict;
+  locale: Locale;
+  email: string | null;
 };
 
-function NavLink({ href, label, icon: Icon, pathname, compact }: NavLinkProps) {
-  const active = isActive(pathname, href);
-
-  return (
-    <Link
-      href={href}
-      className={cn(
-        buttonVariants({
-          variant: active ? "secondary" : "ghost",
-          size: compact ? "sm" : "default",
-        }),
-        compact
-          ? "h-11 flex-1 flex-col gap-0.5 px-1 py-1 text-[10px] font-medium"
-          : "w-full justify-start gap-2",
-      )}
-      aria-current={active ? "page" : undefined}
-    >
-      <Icon className={cn("shrink-0", compact ? "size-5" : "size-4")} aria-hidden />
-      <span className={compact ? "leading-tight" : ""}>{label}</span>
-    </Link>
-  );
-}
-
-/**
- * Barre latérale (desktop) + navigation bas d’écran (mobile).
- */
-export function AppNavigation() {
+export function AppNavigation({ dict, locale, email }: AppNavigationProps) {
   const pathname = usePathname();
 
   return (
     <>
-      <aside className="hidden min-h-0 w-52 shrink-0 flex-col border-r border-border bg-card/40 md:flex md:py-4">
-        <div className="px-3 pb-4">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold tracking-tight hover:bg-muted"
-          >
-            <span className="rounded-md bg-primary/15 px-1.5 py-0.5 text-primary">
-              Concal
-            </span>
-          </Link>
-        </div>
-        <nav className="flex min-h-0 flex-1 flex-col gap-1 px-2" aria-label="Navigation principale">
-          {NAV.map((item) => (
-            <NavLink key={item.href} pathname={pathname} {...item} />
-          ))}
+      <aside
+        className="hidden min-h-0 w-64 shrink-0 flex-col border-r border-border/60 bg-sidebar px-4 py-6 md:flex"
+        aria-label={dict.primary}
+      >
+        <Link href="/dashboard" className="px-1 pb-6">
+          <Logo />
+        </Link>
+
+        <nav className="flex flex-1 flex-col gap-1">
+          {NAV.map((item) => {
+            const active = isActive(pathname, item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "group relative flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors",
+                  active
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-primary opacity-0 transition-opacity",
+                    active && "opacity-100",
+                  )}
+                />
+                <Icon className="size-4 shrink-0" aria-hidden />
+                {dict[item.key]}
+              </Link>
+            );
+          })}
         </nav>
-        <form action={signOut} className="mt-auto border-t border-border px-2 pt-3 pb-2">
-          <button
-            type="submit"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "w-full text-muted-foreground",
-            )}
-          >
-            Déconnexion
-          </button>
-        </form>
+
+        <div className="mt-4 space-y-2">
+          <LocaleSwitcher current={locale} className="w-full justify-between" />
+          <UserChip email={email} signOutLabel={dict.signOut} />
+        </div>
       </aside>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-background/95 px-1 py-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
-        aria-label="Navigation principale"
+        aria-label={dict.primary}
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md md:hidden"
       >
-        {NAV.map((item) => (
-          <NavLink key={item.href} pathname={pathname} {...item} compact />
-        ))}
+        <div className="flex items-stretch justify-around gap-1">
+          {NAV.map((item) => {
+            const active = isActive(pathname, item.href);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "relative flex flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[11px] font-medium transition-colors",
+                  active
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                <Icon className="size-5" aria-hidden />
+                <span className="leading-tight">{dict[item.key]}</span>
+                <span
+                  aria-hidden
+                  className={cn(
+                    "pointer-events-none absolute -top-0.5 size-1.5 rounded-full bg-primary transition-opacity",
+                    active ? "opacity-100" : "opacity-0",
+                  )}
+                />
+              </Link>
+            );
+          })}
+        </div>
       </nav>
     </>
   );

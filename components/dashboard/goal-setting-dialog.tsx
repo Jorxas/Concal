@@ -21,6 +21,18 @@ export type GoalRow = {
   target_fat_g: number;
 };
 
+export type GoalDialogDict = {
+  title: string;
+  subtitle: string;
+  caloriesLabel: string;
+  proteinLabel: string;
+  carbsLabel: string;
+  fatLabel: string;
+  save: string;
+  saving: string;
+  cancel: string;
+};
+
 const FALLBACK_DEFAULTS: GoalRow = {
   target_calories: 2000,
   target_protein_g: 130,
@@ -31,17 +43,15 @@ const FALLBACK_DEFAULTS: GoalRow = {
 type GoalSettingDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Valeurs actuelles pour l’édition ; `null` = première configuration. */
   initialGoal: GoalRow | null;
+  dict: GoalDialogDict;
 };
 
-/**
- * Formulaire client : enregistre les objectifs via Server Action (`upsertUserGoals`).
- */
 export function GoalSettingDialog({
   open,
   onOpenChange,
   initialGoal,
+  dict,
 }: GoalSettingDialogProps) {
   const formId = useId();
   const [error, setError] = useState<string | null>(null);
@@ -51,9 +61,7 @@ export function GoalSettingDialog({
   const formKey = `${open}-${defaults.target_calories}-${defaults.target_protein_g}-${defaults.target_carbs_g}-${defaults.target_fat_g}`;
 
   useEffect(() => {
-    if (!open) {
-      setError(null);
-    }
+    if (!open) setError(null);
   }, [open]);
 
   async function submitGoals(formData: FormData) {
@@ -75,25 +83,24 @@ export function GoalSettingDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Objectifs journaliers</DialogTitle>
-          <DialogDescription>
-            Définis tes cibles pour aujourd’hui. Tu pourras les ajuster à tout
-            moment.
-          </DialogDescription>
+          <DialogTitle className="font-heading text-2xl">
+            {dict.title}
+          </DialogTitle>
+          <DialogDescription>{dict.subtitle}</DialogDescription>
         </DialogHeader>
 
         <form key={formKey} id={formId} action={submitGoals} className="space-y-4">
           {error ? (
             <p
               role="alert"
-              className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+              className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
             >
               {error}
             </p>
           ) : null}
 
           <div className="space-y-2">
-            <Label htmlFor={`${formId}-cal`}>Calories (kcal)</Label>
+            <Label htmlFor={`${formId}-cal`}>{dict.caloriesLabel}</Label>
             <Input
               id={`${formId}-cal`}
               name="target_calories"
@@ -107,7 +114,7 @@ export function GoalSettingDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`${formId}-p`}>Protéines (g)</Label>
+            <Label htmlFor={`${formId}-p`}>{dict.proteinLabel}</Label>
             <Input
               id={`${formId}-p`}
               name="target_protein_g"
@@ -121,7 +128,7 @@ export function GoalSettingDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`${formId}-c`}>Glucides (g)</Label>
+            <Label htmlFor={`${formId}-c`}>{dict.carbsLabel}</Label>
             <Input
               id={`${formId}-c`}
               name="target_carbs_g"
@@ -135,7 +142,7 @@ export function GoalSettingDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`${formId}-f`}>Lipides (g)</Label>
+            <Label htmlFor={`${formId}-f`}>{dict.fatLabel}</Label>
             <Input
               id={`${formId}-f`}
               name="target_fat_g"
@@ -157,10 +164,10 @@ export function GoalSettingDialog({
             disabled={pending}
             onClick={() => onOpenChange(false)}
           >
-            Annuler
+            {dict.cancel}
           </Button>
           <Button type="submit" form={formId} disabled={pending}>
-            {pending ? "Enregistrement…" : "Enregistrer"}
+            {pending ? dict.saving : dict.save}
           </Button>
         </DialogFooter>
       </DialogContent>

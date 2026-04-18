@@ -1,8 +1,13 @@
-import { Compass } from "lucide-react";
+import { Compass, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getSignedMealImageUrl } from "@/lib/storage/meal-media";
 import { firstMealImagePath } from "@/lib/meals/media";
 import { MealCard } from "@/components/meals/meal-card";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { getI18n } from "@/lib/i18n/server";
+import { mealCategoryLabel, mealDifficultyLabel } from "@/lib/meals/labels";
 
 type MealMediaRow = { storage_path: string; sort_order: number };
 
@@ -28,9 +33,12 @@ export default async function ExploreMealsPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
+
+  const { dict } = await getI18n();
+  const categoryDict = dict.meals.new.category;
+  const difficultyDict = dict.meals.new.difficulty;
+  const socialLabels = dict.meals.card;
 
   const { data: meals } = await supabase
     .from("meals")
@@ -45,10 +53,18 @@ export default async function ExploreMealsPage() {
 
   const [{ data: likesRows }, { data: savesRows }] = await Promise.all([
     mealIds.length
-      ? supabase.from("recipe_likes").select("meal_id").eq("user_id", user.id).in("meal_id", mealIds)
+      ? supabase
+          .from("recipe_likes")
+          .select("meal_id")
+          .eq("user_id", user.id)
+          .in("meal_id", mealIds)
       : Promise.resolve({ data: [] as { meal_id: string }[] }),
     mealIds.length
-      ? supabase.from("recipe_saves").select("meal_id").eq("user_id", user.id).in("meal_id", mealIds)
+      ? supabase
+          .from("recipe_saves")
+          .select("meal_id")
+          .eq("user_id", user.id)
+          .in("meal_id", mealIds)
       : Promise.resolve({ data: [] as { meal_id: string }[] }),
   ]);
 
@@ -64,8 +80,8 @@ export default async function ExploreMealsPage() {
       return {
         mealId: m.id,
         title: m.title,
-        category: m.category,
-        difficulty: m.difficulty,
+        categoryLabel: mealCategoryLabel(m.category, categoryDict),
+        difficultyLabel: mealDifficultyLabel(m.difficulty, difficultyDict),
         calories: num(m.calories_per_serving),
         imageUrl,
         initialLiked: likedSet.has(m.id),
@@ -75,30 +91,51 @@ export default async function ExploreMealsPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex-1 space-y-8 px-4 py-8">
-      <header className="flex flex-wrap items-center gap-3">
-        <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Compass className="size-5" aria-hidden />
-        </div>
+    <div className="mx-auto w-full max-w-6xl flex-1 space-y-10 px-4 py-8 md:px-8 md:py-10">
+      <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">
-            Découvrir des repas
+          <p className="text-xs font-medium uppercase tracking-wide text-primary">
+            {dict.nav.explore}
+          </p>
+          <h1 className="mt-1 font-heading text-3xl tracking-tight md:text-4xl">
+            {dict.meals.explore.title}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Recettes publiées par la communauté.
+          <p className="mt-1 text-sm text-muted-foreground">
+            {dict.meals.explore.subtitle}
           </p>
         </div>
+        <Link
+          href="/meals/new"
+          className={cn(
+            buttonVariants(),
+            "h-11 gap-2 rounded-full px-5 text-sm shadow-sm",
+          )}
+        >
+          <Sparkles className="size-4" aria-hidden />
+          {dict.nav.newMeal}
+        </Link>
       </header>
 
       {cards.length === 0 ? (
-        <p className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
-          Aucun repas public pour le moment. Publie le tien depuis « Enregistrer un repas ».
-        </p>
+        <div className="rounded-3xl border border-dashed border-border/70 bg-muted/30 p-12 text-center">
+          <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Compass className="size-6" aria-hidden />
+          </div>
+          <p className="mx-auto mt-4 max-w-sm text-sm text-muted-foreground">
+            {dict.meals.explore.empty}
+          </p>
+        </div>
       ) : (
         <ul className="grid list-none grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => (
             <li key={c.mealId}>
-              <MealCard {...c} />
+              <MealCard
+                {...c}
+                kcalUnit={dict.common.kcal}
+                perServing={`/ ${dict.common.perServing}`}
+                noImageLabel={dict.meals.card.noImage}
+                socialLabels={socialLabels}
+              />
             </li>
           ))}
         </ul>
