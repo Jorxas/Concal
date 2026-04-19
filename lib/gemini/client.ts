@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const MODEL_ID = "gemini-1.5-flash";
+const MODEL_ID = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
 
 /**
  * Modèle Gemini pour l’analyse vision (clé serveur uniquement).
