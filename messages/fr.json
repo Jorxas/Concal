@@ -178,6 +178,7 @@
       "aiLoading": "L'IA analyse ton assiette…",
       "aiFilled": "Champs remplis à partir de la photo.",
       "aiFail": "Analyse impossible.",
+      "aiQuota": "Limite d’analyse IA atteinte (quota Google). Réessaie plus tard, ou active la facturation sur ta clé API Gemini (Google AI Studio).",
       "aiNetwork": "Erreur réseau pendant l'analyse.",
       "pickPhotoFirst": "Choisis d'abord une photo.",
       "publicLabel": "Rendre ce repas public",

@@ -25,6 +25,18 @@ function parseInlineImagePayload(image: string): { mimeType: string; data: strin
   return { mimeType: "image/jpeg", data: trimmed.replace(/\s/g, "") };
 }
 
+function isGeminiQuotaError(message: string): boolean {
+  const m = message.toLowerCase();
+  return (
+    m.includes("429") ||
+    m.includes("too many requests") ||
+    m.includes("quota") ||
+    m.includes("resource_exhausted") ||
+    m.includes("ratelimit") ||
+    m.includes("rate limit")
+  );
+}
+
 /** Parse le texte modèle : JSON pur ou bloc markdown de secours. */
 function parseModelJsonText(raw: string): unknown {
   const text = raw.trim();
@@ -140,6 +152,12 @@ export async function POST(request: Request) {
       e && typeof e === "object" && "message" in e
         ? String((e as { message: unknown }).message)
         : "Erreur Google Gemini.";
+    if (isGeminiQuotaError(message)) {
+      return NextResponse.json(
+        { code: "gemini_quota" as const },
+        { status: 429 },
+      );
+    }
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }

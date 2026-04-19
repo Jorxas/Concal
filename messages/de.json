@@ -178,6 +178,7 @@
       "aiLoading": "KI analysiert deinen Teller…",
       "aiFilled": "Felder aus dem Foto befüllt.",
       "aiFail": "Analyse nicht möglich.",
+      "aiQuota": "KI-Analyselimit erreicht (Google-Kontingent). Später erneut versuchen oder Abrechnung für deinen Gemini-API-Schlüssel in Google AI Studio aktivieren.",
       "aiNetwork": "Netzwerkfehler während der Analyse.",
       "pickPhotoFirst": "Wähle zuerst ein Foto.",
       "publicLabel": "Diese Mahlzeit öffentlich machen",

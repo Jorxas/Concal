@@ -178,6 +178,7 @@
       "aiLoading": "AI is analyzing your plate…",
       "aiFilled": "Fields filled from the photo.",
       "aiFail": "Unable to analyze.",
+      "aiQuota": "AI analysis limit reached (Google quota). Try again later, or enable billing for your Gemini API key in Google AI Studio.",
       "aiNetwork": "Network error during analysis.",
       "pickPhotoFirst": "Pick a photo first.",
       "publicLabel": "Make this meal public",

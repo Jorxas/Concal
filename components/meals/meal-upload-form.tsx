@@ -40,6 +40,7 @@ export type MealFormDict = {
   aiLoading: string;
   aiFilled: string;
   aiFail: string;
+  aiQuota: string;
   aiNetwork: string;
   pickPhotoFirst: string;
   publicLabel: string;
@@ -137,6 +138,15 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
       const body: unknown = await res.json().catch(() => ({}));
 
       if (!res.ok) {
+        if (
+          res.status === 429 &&
+          body &&
+          typeof body === "object" &&
+          (body as { code?: unknown }).code === "gemini_quota"
+        ) {
+          toast.error(dict.aiQuota, { id: toastId });
+          return;
+        }
         const msg =
           body &&
           typeof body === "object" &&
