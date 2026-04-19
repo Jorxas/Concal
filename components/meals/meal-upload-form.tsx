@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { createMeal } from "@/app/(app)/meals/actions";
+import { createMeal, updateMeal } from "@/app/(app)/meals/actions";
 import type { AnalyzeFoodResponse } from "@/lib/validations/analyze-food-response";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,8 +55,11 @@ export type MealFormDict = {
   submitPublic: string;
   submitLoading: string;
   savingMeal: string;
+  savingMealEdit: string;
   mealSaved: string;
+  mealUpdated: string;
   mealNetwork: string;
+  sectionPhotoHelpEdit: string;
   titleLabel: string;
   titlePlaceholder: string;
   descriptionLabel: string;
@@ -115,6 +118,34 @@ function newIngredientRow(): IngredientRow {
   };
 }
 
+export type MealUploadEditConfig = {
+  mealId: string;
+  existingImageUrl: string | null;
+  title: string;
+  description: string;
+  instructions: string;
+  ingredients: { name: string; amount?: string; unit?: string }[];
+  category: string;
+  difficulty: string;
+  calories: string;
+  protein: string;
+  carbs: string;
+  fat: string;
+  isPublic: boolean;
+};
+
+function rowsFromEditIngredients(
+  items: MealUploadEditConfig["ingredients"] | undefined,
+): IngredientRow[] {
+  if (!items?.length) return [newIngredientRow()];
+  return items.map((ing) => ({
+    ...newIngredientRow(),
+    name: ing.name,
+    amount: ing.amount ?? "",
+    unit: ing.unit ?? "",
+  }));
+}
+
 function ingredientsToJson(rows: IngredientRow[]): string {
   const items = rows
     .filter((r) => r.name.trim().length > 0)
@@ -139,26 +170,32 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
-export function MealUploadForm({ dict }: { dict: MealFormDict }) {
+export function MealUploadForm({
+  dict,
+  edit,
+}: {
+  dict: MealFormDict;
+  edit?: MealUploadEditConfig;
+}) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [aiPending, setAiPending] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [instructions, setInstructions] = useState("");
-  const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>(() => [
-    newIngredientRow(),
-  ]);
-  const [category, setCategory] = useState("lunch");
-  const [difficulty, setDifficulty] = useState("easy");
-  const [calories, setCalories] = useState("");
-  const [protein, setProtein] = useState("");
-  const [carbs, setCarbs] = useState("");
-  const [fat, setFat] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
+  const [title, setTitle] = useState(() => edit?.title ?? "");
+  const [description, setDescription] = useState(() => edit?.description ?? "");
+  const [instructions, setInstructions] = useState(() => edit?.instructions ?? "");
+  const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>(() =>
+    rowsFromEditIngredients(edit?.ingredients),
+  );
+  const [category, setCategory] = useState(() => edit?.category ?? "lunch");
+  const [difficulty, setDifficulty] = useState(() => edit?.difficulty ?? "easy");
+  const [calories, setCalories] = useState(() => edit?.calories ?? "");
+  const [protein, setProtein] = useState(() => edit?.protein ?? "");
+  const [carbs, setCarbs] = useState(() => edit?.carbs ?? "");
+  const [fat, setFat] = useState(() => edit?.fat ?? "");
+  const [isPublic, setIsPublic] = useState(() => edit?.isPublic ?? false);
 
   const onImageChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -247,17 +284,18 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
     fd.append("fat_g_per_serving", fat);
     if (selectedFile) fd.append("image", selectedFile);
     fd.append("is_public", isPublic ? "true" : "false");
+    if (edit) fd.append("meal_id", edit.mealId);
 
-    const toastId = toast.loading(dict.savingMeal);
+    const toastId = toast.loading(edit ? dict.savingMealEdit : dict.savingMeal);
     setPending(true);
     try {
-      const result = await createMeal(fd);
+      const result = edit ? await updateMeal(fd) : await createMeal(fd);
       if (!result.success) {
         toast.error(result.error, { id: toastId });
         return;
       }
-      toast.success(dict.mealSaved, { id: toastId });
-      router.push("/dashboard");
+      toast.success(edit ? dict.mealUpdated : dict.mealSaved, { id: toastId });
+      router.push(edit ? `/meals/${edit.mealId}` : "/dashboard");
       router.refresh();
     } catch {
       toast.error(dict.mealNetwork, { id: toastId });
@@ -267,23 +305,36 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
   }
 
   const disableForm = pending || aiPending;
+  const hasExistingPhoto = Boolean(edit?.existingImageUrl);
+  const showSolidPhotoArea = Boolean(
+    previewUrl || (hasExistingPhoto && !previewUrl),
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <FormSection
         title={dict.sectionPhoto}
-        help={dict.sectionPhotoHelp}
+        help={edit ? dict.sectionPhotoHelpEdit : dict.sectionPhotoHelp}
       >
         <label
           htmlFor="meal-image"
           className={cn(
             "group relative flex aspect-[16/10] w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border/70 bg-muted/30 text-center transition-colors hover:border-primary/60 hover:bg-primary/5",
-            previewUrl && "border-solid border-border/60 bg-transparent",
+            showSolidPhotoArea && "border-solid border-border/60 bg-transparent",
           )}
         >
           {previewUrl ? (
             <Image
               src={previewUrl}
+              alt=""
+              fill
+              unoptimized
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 640px"
+            />
+          ) : hasExistingPhoto ? (
+            <Image
+              src={edit!.existingImageUrl!}
               alt=""
               fill
               unoptimized
@@ -666,7 +717,9 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
           variant="outline"
           disabled={disableForm}
           className="h-11 rounded-full px-5"
-          onClick={() => router.push("/dashboard")}
+          onClick={() =>
+            router.push(edit ? `/meals/${edit.mealId}` : "/dashboard")
+          }
         >
           {dict.cancel}
         </Button>

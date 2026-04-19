@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getSignedMealImageUrl } from "@/lib/storage/meal-media";
@@ -10,6 +10,7 @@ import { mealCategoryLabel, mealDifficultyLabel } from "@/lib/meals/labels";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { MealSocialBar } from "@/components/meals/meal-social-bar";
+import { MealDeleteButton } from "@/components/meals/meal-delete-button";
 import { cn } from "@/lib/utils";
 import { getI18n } from "@/lib/i18n/server";
 
@@ -105,18 +106,46 @@ export default async function MealDetailPage({ params }: MealDetailPageProps) {
 
   const kcal = num(meal.calories_per_serving);
 
+  const isOwner = meal.owner_id === user.id;
+  const deleteDict = {
+    delete: dict.meals.detail.delete,
+    deleteTitle: dict.meals.detail.deleteTitle,
+    deleteBody: dict.meals.detail.deleteBody,
+    deleteConfirm: dict.meals.detail.deleteConfirm,
+    deleteCancel: dict.meals.detail.deleteCancel,
+    deleting: dict.meals.detail.deleting,
+    deleteSuccess: dict.meals.detail.deleteSuccess,
+  };
+
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-8 pb-24 md:px-6 md:pb-10">
-      <Link
-        href="/meals/explore"
-        className={cn(
-          buttonVariants({ variant: "ghost", size: "sm" }),
-          "-ml-2 gap-1 text-muted-foreground",
-        )}
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        {dict.meals.detail.back}
-      </Link>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Link
+          href="/meals/explore"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "sm" }),
+            "-ml-2 w-fit gap-1 text-muted-foreground",
+          )}
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          {dict.meals.detail.back}
+        </Link>
+        {isOwner ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={`/meals/${mealId}/edit`}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "gap-1.5 rounded-full",
+              )}
+            >
+              <Pencil className="size-4" aria-hidden />
+              {dict.meals.detail.edit}
+            </Link>
+            <MealDeleteButton mealId={mealId} dict={deleteDict} />
+          </div>
+        ) : null}
+      </div>
 
       <article className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
         <div className="relative aspect-[3/2] w-full bg-muted">

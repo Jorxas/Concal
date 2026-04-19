@@ -9,13 +9,64 @@ import { dateLocaleFor } from "@/lib/i18n/date";
 import { DashboardGoalsControls } from "@/components/dashboard/dashboard-goals-controls";
 import { DailyOverview } from "@/components/dashboard/daily-overview";
 import { MacroDisplay } from "@/components/dashboard/macro-display";
+import {
+  DayMealSlots,
+  type DaySlotFilled,
+  type DaySlotPickRow,
+} from "@/components/dashboard/day-meal-slots";
 import type { GoalRow } from "@/components/dashboard/goal-setting-dialog";
+import { getSignedMealImageUrl } from "@/lib/storage/meal-media";
+import { firstMealImagePath } from "@/lib/meals/media";
+import { DAY_SLOTS, isDaySlot, type DaySlot } from "@/lib/meals/day-slots";
 
 function num(v: string | number | null | undefined): number {
   if (v === null || v === undefined) return 0;
   const n = typeof v === "number" ? v : Number(v);
   return Number.isFinite(n) ? n : 0;
 }
+
+function numOrNull(v: string | number | null | undefined): number | null {
+  if (v === null || v === undefined) return null;
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+type MealMedia = { storage_path: string; sort_order: number };
+
+type MealNested = {
+  id: string;
+  title: string;
+  calories_per_serving: number | string | null;
+  meal_media: MealMedia[] | null;
+};
+
+type SaveRow = {
+  meal_id: string;
+  meals: MealNested | MealNested[] | null;
+};
+
+type OwnedRow = {
+  id: string;
+  title: string;
+  calories_per_serving: number | string | null;
+  meal_media: MealMedia[] | null;
+};
+
+function asMeal(m: MealNested | MealNested[] | null): MealNested | null {
+  if (!m) return null;
+  return Array.isArray(m) ? (m[0] ?? null) : m;
+}
+
+type SlotLogRow = {
+  id: string;
+  day_slot: string | null;
+  meal_id: string;
+  calories: string | number | null;
+  protein_g: string | number | null;
+  carbs_g: string | number | null;
+  fat_g: string | number | null;
+  meals: MealNested | MealNested[] | null;
+};
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -33,24 +84,46 @@ export default async function DashboardPage() {
     locale: dateLocale,
   });
 
-  const { data: goalRow } = await supabase
-    .from("user_goals")
-    .select(
-      "target_calories, target_protein_g, target_carbs_g, target_fat_g, effective_from",
-    )
-    .eq("user_id", user.id)
-    .lte("effective_from", today)
-    .order("effective_from", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const [{ data: goalRow }, { data: slotLogRows }, { data: savesRaw }, { data: ownedRaw }] =
+    await Promise.all([
+      supabase
+        .from("user_goals")
+        .select(
+          "target_calories, target_protein_g, target_carbs_g, target_fat_g, effective_from",
+        )
+        .eq("user_id", user.id)
+        .lte("effective_from", today)
+        .order("effective_from", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("meal_logs")
+        .select(
+          `id, day_slot, meal_id, calories, protein_g, carbs_g, fat_g,
+           meals ( id, title )`,
+        )
+        .eq("user_id", user.id)
+        .eq("logged_on", today)
+        .in("day_slot", [...DAY_SLOTS]),
+      supabase
+        .from("recipe_saves")
+        .select(
+          `meal_id, meals ( id, title, calories_per_serving, meal_media ( storage_path, sort_order ) )`,
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(60),
+      supabase
+        .from("meals")
+        .select(
+          "id, title, calories_per_serving, meal_media ( storage_path, sort_order )",
+        )
+        .eq("owner_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(60),
+    ]);
 
-  const { data: logRows } = await supabase
-    .from("meal_logs")
-    .select("calories, protein_g, carbs_g, fat_g")
-    .eq("user_id", user.id)
-    .eq("logged_on", today);
-
-  const consumed = (logRows ?? []).reduce(
+  const consumed = (slotLogRows ?? []).reduce(
     (acc, row) => ({
       calories: acc.calories + num(row.calories),
       protein: acc.protein + num(row.protein_g),
@@ -59,6 +132,55 @@ export default async function DashboardPage() {
     }),
     { calories: 0, protein: 0, carbs: 0, fat: 0 },
   );
+
+  const filledBySlot: Partial<Record<DaySlot, DaySlotFilled>> = {};
+  for (const raw of slotLogRows ?? []) {
+    const row = raw as SlotLogRow;
+    if (!row.day_slot || !isDaySlot(row.day_slot)) continue;
+    const m = asMeal(row.meals as MealNested | MealNested[] | null);
+    filledBySlot[row.day_slot] = {
+      logId: row.id,
+      mealId: row.meal_id,
+      title: m?.title ?? "—",
+      calories: numOrNull(row.calories),
+      protein: num(row.protein_g),
+      carbs: num(row.carbs_g),
+      fat: num(row.fat_g),
+    };
+  }
+
+  const saves = (savesRaw ?? []) as SaveRow[];
+  const owned = (ownedRaw ?? []) as OwnedRow[];
+
+  const minePickRows: DaySlotPickRow[] = await Promise.all(
+    owned.map(async (row) => {
+      const path = firstMealImagePath(row.meal_media);
+      const imageUrl = path ? await getSignedMealImageUrl(supabase, path) : null;
+      return {
+        mealId: row.id,
+        title: row.title,
+        calories: numOrNull(row.calories_per_serving),
+        imageUrl,
+      };
+    }),
+  );
+
+  const savedPickRows: DaySlotPickRow[] = (
+    await Promise.all(
+      saves.map(async (row) => {
+        const meal = asMeal(row.meals);
+        if (!meal) return null;
+        const path = firstMealImagePath(meal.meal_media);
+        const imageUrl = path ? await getSignedMealImageUrl(supabase, path) : null;
+        return {
+          mealId: meal.id,
+          title: meal.title,
+          calories: numOrNull(meal.calories_per_serving),
+          imageUrl,
+        };
+      }),
+    )
+  ).filter(Boolean) as DaySlotPickRow[];
 
   const currentGoal: GoalRow | null = goalRow
     ? {
@@ -80,6 +202,8 @@ export default async function DashboardPage() {
       cancel: dict.common.cancel,
     },
   };
+
+  const daySlotsDict = dict.dashboard.daySlots;
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 space-y-8 px-4 py-8 md:px-8 md:py-10">
@@ -103,11 +227,18 @@ export default async function DashboardPage() {
           )}
         >
           <PlusCircle className="size-4" aria-hidden />
-          {dict.dashboard.logMeal}
+          {dict.dashboard.newRecipe}
         </Link>
       </header>
 
       <DashboardGoalsControls currentGoal={currentGoal} dict={controlsDict} />
+
+      <DayMealSlots
+        filledBySlot={filledBySlot}
+        mine={minePickRows}
+        saved={savedPickRows}
+        dict={daySlotsDict}
+      />
 
       {currentGoal ? (
         <div className="space-y-6">
