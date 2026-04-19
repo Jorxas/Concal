@@ -16,15 +16,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Camera, ImagePlus, Loader2Icon, Sparkles } from "lucide-react";
+import {
+  Camera,
+  Globe,
+  ImagePlus,
+  Loader2Icon,
+  Lock,
+  Plus,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const INGREDIENTS_PLACEHOLDER = `[
-  { "name": "Avocado", "amount": "1", "unit": "pcs" },
-  { "name": "Eggs", "amount": "2", "unit": "pcs" }
-]`;
 
 export type MealFormDict = {
   sectionPhoto: string;
@@ -43,9 +46,13 @@ export type MealFormDict = {
   aiQuota: string;
   aiNetwork: string;
   pickPhotoFirst: string;
-  publicLabel: string;
-  publicHelp: string;
-  submit: string;
+  visibilityTitle: string;
+  visibilityPrivateTitle: string;
+  visibilityPrivateBody: string;
+  visibilityPublicTitle: string;
+  visibilityPublicBody: string;
+  submitPrivate: string;
+  submitPublic: string;
   submitLoading: string;
   savingMeal: string;
   mealSaved: string;
@@ -58,6 +65,11 @@ export type MealFormDict = {
   instructionsPlaceholder: string;
   ingredientsLabel: string;
   ingredientsHelp: string;
+  ingredientAdd: string;
+  ingredientRemove: string;
+  ingredientName: string;
+  ingredientAmount: string;
+  ingredientUnit: string;
   categoryLabel: string;
   difficultyLabel: string;
   photoLabel: string;
@@ -83,6 +95,41 @@ export type MealFormDict = {
   };
 };
 
+type IngredientRow = {
+  id: string;
+  name: string;
+  amount: string;
+  unit: string;
+};
+
+function newIngredientRow(): IngredientRow {
+  return {
+    id:
+      typeof globalThis.crypto !== "undefined" &&
+      "randomUUID" in globalThis.crypto
+        ? globalThis.crypto.randomUUID()
+        : `row-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name: "",
+    amount: "",
+    unit: "",
+  };
+}
+
+function ingredientsToJson(rows: IngredientRow[]): string {
+  const items = rows
+    .filter((r) => r.name.trim().length > 0)
+    .map((r) => {
+      const name = r.name.trim();
+      const amount = r.amount.trim();
+      const unit = r.unit.trim();
+      const o: { name: string; amount?: string; unit?: string } = { name };
+      if (amount) o.amount = amount;
+      if (unit) o.unit = unit;
+      return o;
+    });
+  return JSON.stringify(items);
+}
+
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -102,7 +149,9 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [ingredients, setIngredients] = useState("");
+  const [ingredientRows, setIngredientRows] = useState<IngredientRow[]>(() => [
+    newIngredientRow(),
+  ]);
   const [category, setCategory] = useState("lunch");
   const [difficulty, setDifficulty] = useState("easy");
   const [calories, setCalories] = useState("");
@@ -161,7 +210,16 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
       const d = body as AnalyzeFoodResponse;
       setTitle(d.title);
       setDescription(d.description);
-      setIngredients(JSON.stringify(d.ingredients, null, 2));
+      setIngredientRows(
+        d.ingredients.length > 0
+          ? d.ingredients.map((ing) => ({
+              ...newIngredientRow(),
+              name: ing.name,
+              amount: ing.amount ?? "",
+              unit: ing.unit ?? "",
+            }))
+          : [newIngredientRow()],
+      );
       setCalories(String(Math.round(d.calories)));
       setProtein(String(d.protein));
       setCarbs(String(d.carbs));
@@ -180,7 +238,7 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
     fd.append("title", title);
     fd.append("description", description);
     fd.append("instructions", instructions);
-    fd.append("ingredients", ingredients);
+    fd.append("ingredients", ingredientsToJson(ingredientRows));
     fd.append("category", category);
     fd.append("difficulty", difficulty);
     fd.append("calories_per_serving", calories);
@@ -322,20 +380,111 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
               disabled={disableForm}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="meal-ingredients">{dict.ingredientsLabel}</Label>
-            <Textarea
-              id="meal-ingredients"
-              value={ingredients}
-              onChange={(e) => setIngredients(e.target.value)}
-              rows={5}
-              placeholder={INGREDIENTS_PLACEHOLDER}
+          <div className="space-y-3">
+            <div>
+              <Label className="text-base">{dict.ingredientsLabel}</Label>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {dict.ingredientsHelp}
+              </p>
+            </div>
+            <ul className="space-y-3">
+              {ingredientRows.map((row, index) => (
+                <li
+                  key={row.id}
+                  className="rounded-2xl border border-border/60 bg-muted/20 p-3 sm:p-4"
+                >
+                  <div className="grid gap-3 sm:grid-cols-[1fr_minmax(0,5.5rem)_minmax(0,6rem)_auto] sm:items-end">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">
+                        {dict.ingredientName}
+                      </Label>
+                      <Input
+                        value={row.name}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setIngredientRows((prev) =>
+                            prev.map((r) =>
+                              r.id === row.id ? { ...r, name: v } : r,
+                            ),
+                          );
+                        }}
+                        disabled={disableForm}
+                        placeholder={dict.ingredientName}
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">
+                        {dict.ingredientAmount}
+                      </Label>
+                      <Input
+                        value={row.amount}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setIngredientRows((prev) =>
+                            prev.map((r) =>
+                              r.id === row.id ? { ...r, amount: v } : r,
+                            ),
+                          );
+                        }}
+                        disabled={disableForm}
+                        placeholder="—"
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground">
+                        {dict.ingredientUnit}
+                      </Label>
+                      <Input
+                        value={row.unit}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setIngredientRows((prev) =>
+                            prev.map((r) =>
+                              r.id === row.id ? { ...r, unit: v } : r,
+                            ),
+                          );
+                        }}
+                        disabled={disableForm}
+                        placeholder="—"
+                        className="h-10"
+                      />
+                    </div>
+                    <div className="flex justify-end sm:pb-0.5">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground hover:text-destructive"
+                        disabled={disableForm || ingredientRows.length <= 1}
+                        onClick={() =>
+                          setIngredientRows((prev) =>
+                            prev.filter((r) => r.id !== row.id),
+                          )
+                        }
+                        aria-label={`${dict.ingredientRemove} ${index + 1}`}
+                      >
+                        <Trash2 className="size-4" aria-hidden />
+                      </Button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="h-9 gap-1.5 rounded-full"
               disabled={disableForm}
-              className="font-mono text-xs md:text-sm"
-            />
-            <p className="text-xs text-muted-foreground">
-              {dict.ingredientsHelp}
-            </p>
+              onClick={() =>
+                setIngredientRows((prev) => [...prev, newIngredientRow()])
+              }
+            >
+              <Plus className="size-4" aria-hidden />
+              {dict.ingredientAdd}
+            </Button>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -379,19 +528,50 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-border/60 bg-card p-4">
-            <div className="space-y-1">
-              <Label htmlFor="meal-public" className="font-medium">
-                {dict.publicLabel}
-              </Label>
-              <p className="text-xs text-muted-foreground">{dict.publicHelp}</p>
+          <div className="space-y-3">
+            <Label className="text-base">{dict.visibilityTitle}</Label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                disabled={disableForm}
+                onClick={() => setIsPublic(false)}
+                aria-pressed={!isPublic}
+                className={cn(
+                  "flex flex-col gap-1 rounded-2xl border-2 p-4 text-left transition outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                  !isPublic
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-border/60 bg-card hover:border-border",
+                )}
+              >
+                <span className="flex items-center gap-2 font-medium">
+                  <Lock className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                  {dict.visibilityPrivateTitle}
+                </span>
+                <span className="text-xs leading-snug text-muted-foreground">
+                  {dict.visibilityPrivateBody}
+                </span>
+              </button>
+              <button
+                type="button"
+                disabled={disableForm}
+                onClick={() => setIsPublic(true)}
+                aria-pressed={isPublic}
+                className={cn(
+                  "flex flex-col gap-1 rounded-2xl border-2 p-4 text-left transition outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                  isPublic
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-border/60 bg-card hover:border-border",
+                )}
+              >
+                <span className="flex items-center gap-2 font-medium">
+                  <Globe className="size-4 shrink-0 text-primary" aria-hidden />
+                  {dict.visibilityPublicTitle}
+                </span>
+                <span className="text-xs leading-snug text-muted-foreground">
+                  {dict.visibilityPublicBody}
+                </span>
+              </button>
             </div>
-            <Switch
-              id="meal-public"
-              checked={isPublic}
-              onCheckedChange={setIsPublic}
-              disabled={disableForm}
-            />
           </div>
         </div>
       </FormSection>
@@ -475,8 +655,10 @@ export function MealUploadForm({ dict }: { dict: MealFormDict }) {
               <Loader2Icon className="size-4 animate-spin" aria-hidden />
               {dict.submitLoading}
             </>
+          ) : isPublic ? (
+            dict.submitPublic
           ) : (
-            dict.submit
+            dict.submitPrivate
           )}
         </Button>
         <Button
