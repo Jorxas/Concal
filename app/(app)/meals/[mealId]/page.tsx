@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, ExternalLink, Pencil } from "lucide-react";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getSignedMealImageUrl } from "@/lib/storage/meal-media";
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { MealSocialBar } from "@/components/meals/meal-social-bar";
 import { MealDeleteButton } from "@/components/meals/meal-delete-button";
+import { MealVisibilityToggle } from "@/components/meals/meal-visibility-toggle";
 import { cn } from "@/lib/utils";
 import { getI18n } from "@/lib/i18n/server";
 
@@ -36,6 +37,7 @@ type MealDetailRow = {
   carbs_g_per_serving: number | string | null;
   fat_g_per_serving: number | string | null;
   is_public: boolean;
+  cooking_video_url: string | null;
   meal_media: MealMediaRow[] | null;
 };
 
@@ -70,7 +72,7 @@ export default async function MealDetailPage({ params }: MealDetailPageProps) {
     .select(
       `id, owner_id, title, description, instructions, ingredients, category, difficulty,
        calories_per_serving, protein_g_per_serving, carbs_g_per_serving, fat_g_per_serving,
-       is_public, meal_media ( storage_path, sort_order )`,
+       is_public, cooking_video_url, meal_media ( storage_path, sort_order )`,
     )
     .eq("id", mealId)
     .maybeSingle();
@@ -107,6 +109,16 @@ export default async function MealDetailPage({ params }: MealDetailPageProps) {
   const kcal = num(meal.calories_per_serving);
 
   const isOwner = meal.owner_id === user.id;
+  const visibilityToggleDict = {
+    makePublic: dict.meals.detail.visibilityMakePublic,
+    makePrivate: dict.meals.detail.visibilityMakePrivate,
+    ariaMakePublic: dict.meals.detail.visibilityAriaMakePublic,
+    ariaMakePrivate: dict.meals.detail.visibilityAriaMakePrivate,
+    toastNowPublic: dict.meals.detail.visibilityToastPublic,
+    toastNowPrivate: dict.meals.detail.visibilityToastPrivate,
+    pending: dict.meals.detail.visibilityPending,
+  };
+
   const deleteDict = {
     delete: dict.meals.detail.delete,
     deleteTitle: dict.meals.detail.deleteTitle,
@@ -142,6 +154,11 @@ export default async function MealDetailPage({ params }: MealDetailPageProps) {
               <Pencil className="size-4" aria-hidden />
               {dict.meals.detail.edit}
             </Link>
+            <MealVisibilityToggle
+              mealId={mealId}
+              initialIsPublic={meal.is_public}
+              dict={visibilityToggleDict}
+            />
             <MealDeleteButton mealId={mealId} dict={deleteDict} />
           </div>
         ) : null}
@@ -255,6 +272,24 @@ export default async function MealDetailPage({ params }: MealDetailPageProps) {
               <p className="whitespace-pre-wrap text-[15px] leading-relaxed">
                 {meal.instructions}
               </p>
+            </section>
+          ) : null}
+
+          {meal.cooking_video_url?.trim() ? (
+            <section>
+              <a
+                href={meal.cooking_video_url.trim()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "inline-flex h-10 gap-2 rounded-full px-4 text-sm font-medium",
+                )}
+                aria-label={dict.meals.detail.cookingVideoLinkAria}
+              >
+                <ExternalLink className="size-4 shrink-0" aria-hidden />
+                {dict.meals.detail.cookingVideoLink}
+              </a>
             </section>
           ) : null}
         </div>

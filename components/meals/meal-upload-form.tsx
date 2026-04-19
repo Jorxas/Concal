@@ -81,6 +81,9 @@ export type MealFormDict = {
   proteinLabel: string;
   carbsLabel: string;
   fatLabel: string;
+  videoUrlLabel: string;
+  videoUrlPlaceholder: string;
+  videoUrlHelp: string;
   cancel: string;
   category: {
     breakfast: string;
@@ -132,6 +135,7 @@ export type MealUploadEditConfig = {
   carbs: string;
   fat: string;
   isPublic: boolean;
+  cookingVideoUrl: string;
 };
 
 function rowsFromEditIngredients(
@@ -196,6 +200,9 @@ export function MealUploadForm({
   const [carbs, setCarbs] = useState(() => edit?.carbs ?? "");
   const [fat, setFat] = useState(() => edit?.fat ?? "");
   const [isPublic, setIsPublic] = useState(() => edit?.isPublic ?? false);
+  const [cookingVideoUrl, setCookingVideoUrl] = useState(
+    () => edit?.cookingVideoUrl ?? "",
+  );
 
   const onImageChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -282,6 +289,7 @@ export function MealUploadForm({
     fd.append("protein_g_per_serving", protein);
     fd.append("carbs_g_per_serving", carbs);
     fd.append("fat_g_per_serving", fat);
+    fd.append("cooking_video_url", cookingVideoUrl);
     if (selectedFile) fd.append("image", selectedFile);
     fd.append("is_public", isPublic ? "true" : "false");
     if (edit) fd.append("meal_id", edit.mealId);
@@ -430,6 +438,21 @@ export function MealUploadForm({
               placeholder={dict.instructionsPlaceholder}
               disabled={disableForm}
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="meal-cooking-video-url">{dict.videoUrlLabel}</Label>
+            <Input
+              id="meal-cooking-video-url"
+              type="url"
+              inputMode="url"
+              autoComplete="url"
+              value={cookingVideoUrl}
+              onChange={(e) => setCookingVideoUrl(e.target.value)}
+              placeholder={dict.videoUrlPlaceholder}
+              disabled={disableForm}
+              className="h-11"
+            />
+            <p className="text-xs text-muted-foreground">{dict.videoUrlHelp}</p>
           </div>
           <div className="space-y-3">
             <div>

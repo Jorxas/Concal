@@ -250,6 +250,9 @@
       "proteinLabel": "Protéines (g)",
       "carbsLabel": "Glucides (g)",
       "fatLabel": "Lipides (g)",
+      "videoUrlLabel": "Lien vers une vidéo de préparation",
+      "videoUrlPlaceholder": "https://… (YouTube, TikTok, etc.)",
+      "videoUrlHelp": "Optionnel. Colle un lien vers une vidéo qui montre comment préparer le plat.",
       "category": {
         "breakfast": "Petit-déjeuner",
         "lunch": "Déjeuner",
@@ -282,7 +285,16 @@
       "deleteSuccess": "Recette supprimée.",
       "ingredients": "Ingrédients",
       "instructions": "Préparation",
-      "noImage": "Pas d'image"
+      "noImage": "Pas d'image",
+      "visibilityMakePublic": "Rendre public",
+      "visibilityMakePrivate": "Rendre privé",
+      "visibilityAriaMakePublic": "Publier cette recette pour tout le monde",
+      "visibilityAriaMakePrivate": "Rendre cette recette privée",
+      "visibilityToastPublic": "La recette est maintenant publique.",
+      "visibilityToastPrivate": "La recette est maintenant privée.",
+      "visibilityPending": "Mise à jour…",
+      "cookingVideoLink": "Voir la vidéo de préparation",
+      "cookingVideoLinkAria": "Ouvrir la vidéo de préparation dans un nouvel onglet"
     },
     "card": {
       "noImage": "Pas d'image",

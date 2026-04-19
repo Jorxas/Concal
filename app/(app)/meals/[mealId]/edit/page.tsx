@@ -35,6 +35,7 @@ type MealEditRow = {
   carbs_g_per_serving: number | string | null;
   fat_g_per_serving: number | string | null;
   is_public: boolean;
+  cooking_video_url: string | null;
   meal_media: MealMediaRow[] | null;
 };
 
@@ -69,7 +70,7 @@ export default async function MealEditPage({ params }: MealEditPageProps) {
     .select(
       `id, owner_id, title, description, instructions, ingredients, category, difficulty,
        calories_per_serving, protein_g_per_serving, carbs_g_per_serving, fat_g_per_serving,
-       is_public, meal_media ( storage_path, sort_order )`,
+       is_public, cooking_video_url, meal_media ( storage_path, sort_order )`,
     )
     .eq("id", mealId)
     .maybeSingle();
@@ -103,6 +104,7 @@ export default async function MealEditPage({ params }: MealEditPageProps) {
     carbs: strMacro(meal.carbs_g_per_serving),
     fat: strMacro(meal.fat_g_per_serving),
     isPublic: meal.is_public,
+    cookingVideoUrl: meal.cooking_video_url ?? "",
   };
 
   const formDict = { ...dict.meals.new, cancel: dict.common.cancel };

@@ -250,6 +250,9 @@
       "proteinLabel": "Protein (g)",
       "carbsLabel": "Kohlenhydrate (g)",
       "fatLabel": "Fett (g)",
+      "videoUrlLabel": "Link zum Zubereitungsvideo",
+      "videoUrlPlaceholder": "https://… (YouTube, TikTok usw.)",
+      "videoUrlHelp": "Optional. Füge einen Link zu einem Video ein, das die Zubereitung zeigt.",
       "category": {
         "breakfast": "Frühstück",
         "lunch": "Mittagessen",
@@ -282,7 +285,16 @@
       "deleteSuccess": "Rezept gelöscht.",
       "ingredients": "Zutaten",
       "instructions": "Zubereitung",
-      "noImage": "Kein Bild"
+      "noImage": "Kein Bild",
+      "visibilityMakePublic": "Öffentlich machen",
+      "visibilityMakePrivate": "Privat machen",
+      "visibilityAriaMakePublic": "Dieses Rezept für alle veröffentlichen",
+      "visibilityAriaMakePrivate": "Dieses Rezept privat machen",
+      "visibilityToastPublic": "Das Rezept ist jetzt öffentlich.",
+      "visibilityToastPrivate": "Das Rezept ist jetzt privat.",
+      "visibilityPending": "Aktualisiere…",
+      "cookingVideoLink": "Zubereitungsvideo ansehen",
+      "cookingVideoLinkAria": "Zubereitungsvideo in neuem Tab öffnen"
     },
     "card": {
       "noImage": "Kein Bild",

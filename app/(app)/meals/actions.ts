@@ -21,6 +21,10 @@ export type ToggleSocialResult =
   | { ok: true; active: boolean }
   | { ok: false; error: string };
 
+export type ToggleMealVisibilityResult =
+  | { success: true; isPublic: boolean }
+  | { success: false; error: string };
+
 /**
  * Crée une recette (`meals`) et éventuellement l’image (`meal_media`).
  * Le journal du jour se remplit depuis le tableau de bord (4 moments), pas ici.
@@ -42,6 +46,7 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
     protein_g_per_serving: formData.get("protein_g_per_serving"),
     carbs_g_per_serving: formData.get("carbs_g_per_serving"),
     fat_g_per_serving: formData.get("fat_g_per_serving"),
+    cooking_video_url: formData.get("cooking_video_url"),
   });
 
   if (!parsedFields.success) {
@@ -102,6 +107,7 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
     carbs_g_per_serving: d.carbs_g_per_serving,
     fat_g_per_serving: d.fat_g_per_serving,
     is_public: isPublic,
+    cooking_video_url: d.cooking_video_url,
   });
 
   if (mealError) {
@@ -168,6 +174,7 @@ export async function updateMeal(formData: FormData): Promise<CreateMealResult> 
     protein_g_per_serving: formData.get("protein_g_per_serving"),
     carbs_g_per_serving: formData.get("carbs_g_per_serving"),
     fat_g_per_serving: formData.get("fat_g_per_serving"),
+    cooking_video_url: formData.get("cooking_video_url"),
   });
 
   if (!parsedFields.success) {
@@ -244,6 +251,7 @@ export async function updateMeal(formData: FormData): Promise<CreateMealResult> 
       carbs_g_per_serving: d.carbs_g_per_serving,
       fat_g_per_serving: d.fat_g_per_serving,
       is_public: isPublic,
+      cooking_video_url: d.cooking_video_url,
     })
     .eq("id", mealId)
     .eq("owner_id", user.id);
@@ -288,6 +296,65 @@ export async function updateMeal(formData: FormData): Promise<CreateMealResult> 
   }
 
   return { success: true, mealId };
+}
+
+/**
+ * Bascule la visibilité d’une recette (propriétaire uniquement), sans passer par l’édition.
+ */
+export async function toggleMealVisibility(
+  mealId: string,
+): Promise<ToggleMealVisibilityResult> {
+  const id = mealId.trim();
+  if (!id) {
+    return { success: false, error: "Repas invalide." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "Tu dois être connecté." };
+  }
+
+  const { data: existing, error: existErr } = await supabase
+    .from("meals")
+    .select("id, owner_id, is_public")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (existErr || !existing || existing.owner_id !== user.id) {
+    return { success: false, error: "Repas introuvable ou accès refusé." };
+  }
+
+  const wasPublic = Boolean(existing.is_public);
+  const isPublic = !wasPublic;
+
+  const { error: updErr } = await supabase
+    .from("meals")
+    .update({ is_public: isPublic })
+    .eq("id", id)
+    .eq("owner_id", user.id);
+
+  if (updErr) {
+    return {
+      success: false,
+      error: friendlySupabaseError(`[meals] ${updErr.message}`),
+    };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/meals/new");
+  revalidatePath(`/meals/${id}`);
+  revalidatePath(`/meals/${id}/edit`);
+  revalidatePath("/profile");
+  if (isPublic || wasPublic) {
+    revalidatePath("/meals/explore");
+  }
+
+  return { success: true, isPublic };
 }
 
 export type DeleteMealResult =

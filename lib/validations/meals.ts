@@ -75,6 +75,19 @@ export const createMealFormSchema = z.object({
     .min(0)
     .max(2000),
   fat_g_per_serving: z.coerce.number().min(0).max(2000),
+  cooking_video_url: z
+    .union([z.string(), z.undefined(), z.null()])
+    .transform((v) => (v == null ? "" : String(v)).trim())
+    .pipe(
+      z.union([
+        z.literal(""),
+        z
+          .string()
+          .max(2000, "Le lien est trop long.")
+          .url("Indique une URL valide (https://…)."),
+      ]),
+    )
+    .transform((s) => (s === "" ? null : s)),
 });
 
 export type CreateMealFormValues = z.infer<typeof createMealFormSchema>;

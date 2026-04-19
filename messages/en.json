@@ -250,6 +250,9 @@
       "proteinLabel": "Protein (g)",
       "carbsLabel": "Carbs (g)",
       "fatLabel": "Fat (g)",
+      "videoUrlLabel": "Cooking video link",
+      "videoUrlPlaceholder": "https://… (YouTube, TikTok, etc.)",
+      "videoUrlHelp": "Optional. Paste a link to a video that shows how to cook this dish.",
       "category": {
         "breakfast": "Breakfast",
         "lunch": "Lunch",
@@ -282,7 +285,16 @@
       "deleteSuccess": "Recipe deleted.",
       "ingredients": "Ingredients",
       "instructions": "Preparation",
-      "noImage": "No image"
+      "noImage": "No image",
+      "visibilityMakePublic": "Make public",
+      "visibilityMakePrivate": "Make private",
+      "visibilityAriaMakePublic": "Publish this recipe for everyone",
+      "visibilityAriaMakePrivate": "Make this recipe private",
+      "visibilityToastPublic": "Recipe is now public.",
+      "visibilityToastPrivate": "Recipe is now private.",
+      "visibilityPending": "Updating…",
+      "cookingVideoLink": "Watch preparation video",
+      "cookingVideoLinkAria": "Open cooking video in a new tab"
     },
     "card": {
       "noImage": "No image",

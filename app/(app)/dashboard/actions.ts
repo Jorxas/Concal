@@ -311,6 +311,7 @@ export async function setDaySlotFromQuickPhoto(
     carbs_g_per_serving: carbs,
     fat_g_per_serving: fat,
     is_public: false,
+    cooking_video_url: null,
   });
 
   if (mealError) {
