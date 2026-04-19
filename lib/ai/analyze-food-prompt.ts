@@ -9,10 +9,12 @@ Tâche :
 - Estime les portions avec des repères concrets (fourchette, cuillère, main, bol type ~500 ml, assiette ~25 cm) lorsqu’ils sont visibles ou déductibles.
 - En cas d’ambiguïté, choisis l’hypothèse la plus plausible pour un repas individuel, sans surestimation systématique.
 
-Chiffres :
-- calories, protein, carbs et fat correspondent à UNE seule portion telle qu’elle apparaît sur la photo (ce qui est servi / photographié).
-- protein, carbs et fat sont en grammes pour cette portion.
-- calories est en kilocalories (nombre entier raisonnable).
+Chiffres (très important) :
+- calories, protein, carbs et fat correspondent strictement à ce qui est VISIBLE sur l’image : surface occupée par le plat, hauteur apparente dans le bol/assiette, morceaux réellement présents dans le cadre.
+- Ne pas extrapoler une portion « restaurant » ou standard si la photo montre clairement moins (demi-assiette, reste, zoom serré, etc.) : les chiffres doivent baisser en conséquence.
+- Si une partie du plat est hors cadre ou masquée, ne compte pas ce que tu ne vois pas ; reste prudent plutôt que généreux.
+- protein, carbs et fat sont en grammes pour cette portion visible.
+- calories est en kilocalories (entier raisonnable) pour cette même portion visible.
 
 Langue :
 - Les clés JSON restent en anglais (title, ingredients, etc.) comme demandé.

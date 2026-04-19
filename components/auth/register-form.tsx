@@ -8,6 +8,8 @@ import { registerSchema } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordField } from "@/components/auth/password-field";
+import type { PasswordFieldLabels } from "@/components/auth/password-field";
 
 type FieldKey = "email" | "password" | "confirmPassword";
 
@@ -23,6 +25,12 @@ export type RegisterFormDict = {
   signIn: string;
   confirmInfo: string;
   unexpected: string;
+  passwordToggle: PasswordFieldLabels;
+  oauth: {
+    continueWithGoogle: string;
+    divider: string;
+    error: string;
+  };
 };
 
 export function RegisterForm({ dict }: { dict: RegisterFormDict }) {
@@ -36,6 +44,33 @@ export function RegisterForm({ dict }: { dict: RegisterFormDict }) {
   const [formError, setFormError] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
+
+  async function onGoogleSignIn() {
+    setFormError(null);
+    setInfoMessage(null);
+    setOauthLoading(true);
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent("/dashboard")}`,
+        },
+      });
+      if (error) {
+        setFormError(dict.oauth.error);
+        return;
+      }
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      setFormError(dict.oauth.error);
+    } finally {
+      setOauthLoading(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -146,19 +181,18 @@ export function RegisterForm({ dict }: { dict: RegisterFormDict }) {
 
         <div className="space-y-2">
           <Label htmlFor="register-password">{dict.passwordLabel}</Label>
-          <Input
+          <PasswordField
             id="register-password"
             name="password"
-            type="password"
             autoComplete="new-password"
-            className="h-11"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
+            onChange={setPassword}
+            disabled={loading || oauthLoading}
             aria-invalid={Boolean(fieldErrors.password)}
             aria-describedby={
               fieldErrors.password ? "register-password-error" : undefined
             }
+            labels={dict.passwordToggle}
           />
           {fieldErrors.password ? (
             <p
@@ -174,21 +208,20 @@ export function RegisterForm({ dict }: { dict: RegisterFormDict }) {
           <Label htmlFor="register-confirm">
             {dict.confirmPasswordLabel}
           </Label>
-          <Input
+          <PasswordField
             id="register-confirm"
             name="confirmPassword"
-            type="password"
             autoComplete="new-password"
-            className="h-11"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            disabled={loading}
+            onChange={setConfirmPassword}
+            disabled={loading || oauthLoading}
             aria-invalid={Boolean(fieldErrors.confirmPassword)}
             aria-describedby={
               fieldErrors.confirmPassword
                 ? "register-confirm-error"
                 : undefined
             }
+            labels={dict.passwordToggle}
           />
           {fieldErrors.confirmPassword ? (
             <p
@@ -202,10 +235,31 @@ export function RegisterForm({ dict }: { dict: RegisterFormDict }) {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || oauthLoading}
           className="h-11 w-full rounded-full text-sm font-medium"
         >
           {loading ? dict.submitLoading : dict.submit}
+        </Button>
+
+        <div className="relative py-2">
+          <div className="absolute inset-0 flex items-center" aria-hidden>
+            <span className="w-full border-t border-border/80" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase tracking-wide">
+            <span className="bg-card px-2 text-muted-foreground">
+              {dict.oauth.divider}
+            </span>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          disabled={loading || oauthLoading}
+          className="h-11 w-full rounded-full text-sm font-medium"
+          onClick={() => void onGoogleSignIn()}
+        >
+          {oauthLoading ? dict.submitLoading : dict.oauth.continueWithGoogle}
         </Button>
       </form>
 

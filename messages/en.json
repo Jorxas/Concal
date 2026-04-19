@@ -122,6 +122,15 @@
       "confirmInfo": "Account created. If email confirmation is enabled, check your inbox before signing in."
     },
     "unexpected": "Unexpected error. Please try again.",
+    "passwordToggle": {
+      "show": "Show password",
+      "hide": "Hide password"
+    },
+    "oauth": {
+      "continueWithGoogle": "Continue with Google",
+      "divider": "or",
+      "error": "Google sign-in failed. Try again or use email and password."
+    },
     "loginErrors": {
       "authCallback": "We couldn’t finish signing you in from that link (expired, already used, or incomplete). Request a new confirmation email or sign in if your account is already active.",
       "invalidCredentials": "Incorrect email or password. If you just signed up, open the confirmation link in your latest email first to activate your account, then try again — or check for typos.",
@@ -153,7 +162,14 @@
       "emptySaved": "No saved recipes yet. Add some from Discover.",
       "slotUpdated": "Meal slot updated.",
       "slotCleared": "Meal slot cleared.",
-      "networkError": "Network error. Try again."
+      "networkError": "Network error. Try again.",
+      "tabPhoto": "Photo",
+      "takePhoto": "Take a photo",
+      "photoHint": "Creates a private recipe and fills this meal slot — no need to use “New recipe” first.",
+      "photoAnalyzing": "Analyzing photo…",
+      "photoSlotUpdated": "Meal logged for this slot (from your photo).",
+      "photoQuota": "AI analysis quota reached. Try again later.",
+      "photoEstimateNote": "Calories and macros reflect what’s visible in the photo, not an arbitrary standard portion."
     },
     "consumed": "Consumed",
     "remaining": "Remaining",

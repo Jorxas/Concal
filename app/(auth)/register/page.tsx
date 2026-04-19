@@ -18,6 +18,8 @@ export default async function RegisterPage() {
   const formDict = {
     ...dict.auth.register,
     unexpected: dict.auth.unexpected,
+    passwordToggle: dict.auth.passwordToggle,
+    oauth: dict.auth.oauth,
   };
 
   return (

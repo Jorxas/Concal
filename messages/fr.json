@@ -122,6 +122,15 @@
       "confirmInfo": "Compte créé. Si la confirmation par email est activée, consulte ta boîte avant de te connecter."
     },
     "unexpected": "Erreur inattendue. Réessaie.",
+    "passwordToggle": {
+      "show": "Afficher le mot de passe",
+      "hide": "Masquer le mot de passe"
+    },
+    "oauth": {
+      "continueWithGoogle": "Continuer avec Google",
+      "divider": "ou",
+      "error": "La connexion Google a échoué. Réessaie ou utilise email et mot de passe."
+    },
     "loginErrors": {
       "authCallback": "Le lien de confirmation n’a pas pu terminer la connexion (expiré, déjà utilisé ou incomplet). Réessaie depuis un nouveau mail ou connecte-toi si ton compte est déjà actif.",
       "invalidCredentials": "Email ou mot de passe incorrect. Si tu viens de t’inscrire, ouvre d’abord le lien dans le dernier mail de confirmation pour activer le compte, puis réessaie — ou vérifie que tu n’as pas de faute de frappe.",
@@ -153,7 +162,14 @@
       "emptySaved": "Aucun favori pour l’instant. Ajoute des recettes depuis Découvrir.",
       "slotUpdated": "Moment du jour mis à jour.",
       "slotCleared": "Moment du jour vidé.",
-      "networkError": "Erreur réseau. Réessaie."
+      "networkError": "Erreur réseau. Réessaie.",
+      "tabPhoto": "Photo",
+      "takePhoto": "Prendre une photo",
+      "photoHint": "Une recette privée est créée et ce moment du jour est rempli — sans passer par « Nouvelle recette ».",
+      "photoAnalyzing": "Analyse de la photo…",
+      "photoSlotUpdated": "Repas enregistré pour ce moment (photo analysée).",
+      "photoQuota": "Quota d’analyse IA atteint. Réessaie plus tard.",
+      "photoEstimateNote": "Les calories et macros estiment ce qui est visible sur la photo, pas une portion standard arbitraire."
     },
     "consumed": "Consommé",
     "remaining": "Restant",

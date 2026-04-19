@@ -2,10 +2,22 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Apple, Coffee, Loader2Icon, Moon, Soup, X } from "lucide-react";
-import { clearDaySlot, setDaySlotMeal } from "@/app/(app)/dashboard/actions";
+import {
+  Apple,
+  Camera,
+  Coffee,
+  Loader2Icon,
+  Moon,
+  Soup,
+  X,
+} from "lucide-react";
+import {
+  clearDaySlot,
+  setDaySlotFromQuickPhoto,
+  setDaySlotMeal,
+} from "@/app/(app)/dashboard/actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -45,6 +57,13 @@ export type DayMealSlotsDict = {
   clearSlot: string;
   tabMine: string;
   tabSaved: string;
+  tabPhoto: string;
+  takePhoto: string;
+  photoHint: string;
+  photoAnalyzing: string;
+  photoSlotUpdated: string;
+  photoQuota: string;
+  photoEstimateNote: string;
   emptyMine: string;
   emptySaved: string;
   slotUpdated: string;
@@ -74,6 +93,8 @@ function slotLabel(slot: DaySlot, dict: DayMealSlotsDict): string {
   }
 }
 
+type PickerTab = "mine" | "saved" | "photo";
+
 export function DayMealSlots({
   filledBySlot,
   mine,
@@ -86,9 +107,10 @@ export function DayMealSlots({
   dict: DayMealSlotsDict;
 }) {
   const router = useRouter();
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<DaySlot | null>(null);
-  const [tab, setTab] = useState<"mine" | "saved">("mine");
+  const [tab, setTab] = useState<PickerTab>("mine");
   const [pending, startTransition] = useTransition();
 
   function openPicker(slot: DaySlot) {
@@ -116,6 +138,36 @@ export function DayMealSlots({
     });
   }
 
+  function onPhotoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file || !activeSlot) return;
+    startTransition(async () => {
+      try {
+        const fd = new FormData();
+        fd.append("slot", activeSlot);
+        fd.append("image", file);
+        const result = await setDaySlotFromQuickPhoto(fd);
+        if (!result.ok) {
+          if (result.code === "gemini_quota") {
+            toast.error(dict.photoQuota);
+          } else {
+            toast.error(result.error);
+          }
+          return;
+        }
+        toast.success(dict.photoSlotUpdated, {
+          description: dict.photoEstimateNote,
+        });
+        setDialogOpen(false);
+        setActiveSlot(null);
+        router.refresh();
+      } catch {
+        toast.error(dict.networkError);
+      }
+    });
+  }
+
   function clearSlot(slot: DaySlot) {
     startTransition(async () => {
       try {
@@ -134,6 +186,31 @@ export function DayMealSlots({
 
   const list = tab === "mine" ? mine : saved;
   const emptyLabel = tab === "mine" ? dict.emptyMine : dict.emptySaved;
+
+  function tabButton(
+    id: PickerTab,
+    label: string,
+    isActive: boolean,
+    onSelect: () => void,
+  ) {
+    return (
+      <button
+        type="button"
+        className={cn(
+          "relative min-w-0 flex-1 px-1 py-2.5 text-xs font-medium transition-colors sm:text-sm",
+          isActive
+            ? "text-foreground"
+            : "text-muted-foreground hover:text-foreground",
+        )}
+        onClick={onSelect}
+      >
+        <span className="line-clamp-2">{label}</span>
+        {isActive ? (
+          <span className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary sm:inset-x-3" />
+        ) : null}
+      </button>
+    );
+  }
 
   return (
     <>
@@ -234,46 +311,49 @@ export function DayMealSlots({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex border-b border-border/60 px-2">
-            <button
-              type="button"
-              className={cn(
-                "relative flex-1 py-2.5 text-sm font-medium transition-colors",
-                tab === "mine"
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-              onClick={() => setTab("mine")}
-            >
-              {dict.tabMine}
-              {tab === "mine" ? (
-                <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary" />
-              ) : null}
-            </button>
-            <button
-              type="button"
-              className={cn(
-                "relative flex-1 py-2.5 text-sm font-medium transition-colors",
-                tab === "saved"
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-              onClick={() => setTab("saved")}
-            >
-              {dict.tabSaved}
-              {tab === "saved" ? (
-                <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-primary" />
-              ) : null}
-            </button>
+          <input
+            ref={photoInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="sr-only"
+            aria-hidden
+            tabIndex={-1}
+            onChange={onPhotoFileChange}
+          />
+
+          <div className="flex border-b border-border/60 px-1 sm:px-2">
+            {tabButton("mine", dict.tabMine, tab === "mine", () =>
+              setTab("mine"),
+            )}
+            {tabButton("saved", dict.tabSaved, tab === "saved", () =>
+              setTab("saved"),
+            )}
+            {tabButton("photo", dict.tabPhoto, tab === "photo", () =>
+              setTab("photo"),
+            )}
           </div>
 
           <div className="max-h-[min(60vh,22rem)] overflow-y-auto p-2">
             {pending ? (
-              <div className="flex justify-center py-12">
-                <Loader2Icon
-                  className="size-8 animate-spin text-muted-foreground"
-                  aria-hidden
-                />
+              <div className="flex flex-col items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
+                <Loader2Icon className="size-8 animate-spin" aria-hidden />
+                {tab === "photo" ? <span>{dict.photoAnalyzing}</span> : null}
+              </div>
+            ) : tab === "photo" ? (
+              <div className="space-y-4 px-2 py-4">
+                <p className="text-sm text-muted-foreground">{dict.photoHint}</p>
+                <p className="text-xs text-muted-foreground">{dict.photoEstimateNote}</p>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="h-11 w-full gap-2 rounded-xl"
+                  disabled={pending}
+                  onClick={() => photoInputRef.current?.click()}
+                >
+                  <Camera className="size-4 shrink-0" aria-hidden />
+                  {dict.takePhoto}
+                </Button>
               </div>
             ) : list.length === 0 ? (
               <p className="px-3 py-10 text-center text-sm text-muted-foreground">

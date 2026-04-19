@@ -122,6 +122,15 @@
       "confirmInfo": "Konto erstellt. Falls E-Mail-Bestätigung aktiv ist, prüfe dein Postfach vor dem Login."
     },
     "unexpected": "Unerwarteter Fehler. Bitte erneut versuchen.",
+    "passwordToggle": {
+      "show": "Passwort anzeigen",
+      "hide": "Passwort ausblenden"
+    },
+    "oauth": {
+      "continueWithGoogle": "Mit Google fortfahren",
+      "divider": "oder",
+      "error": "Google-Anmeldung fehlgeschlagen. Erneut versuchen oder E-Mail und Passwort nutzen."
+    },
     "loginErrors": {
       "authCallback": "Der Bestätigungslink konnte die Anmeldung nicht abschließen (abgelaufen, bereits verwendet oder unvollständig). Fordere eine neue E-Mail an oder melde dich an, falls dein Konto schon aktiv ist.",
       "invalidCredentials": "E-Mail oder Passwort ist falsch. Wenn du dich gerade registriert hast, öffne zuerst den Link in der neuesten Bestätigungsmail, um das Konto zu aktivieren, und versuche es erneut — oder prüfe auf Tippfehler.",
@@ -153,7 +162,14 @@
       "emptySaved": "Noch keine Favoriten. Füge welche unter Entdecken hinzu.",
       "slotUpdated": "Slot aktualisiert.",
       "slotCleared": "Slot geleert.",
-      "networkError": "Netzwerkfehler. Bitte erneut versuchen."
+      "networkError": "Netzwerkfehler. Bitte erneut versuchen.",
+      "tabPhoto": "Foto",
+      "takePhoto": "Foto aufnehmen",
+      "photoHint": "Erstellt ein privates Rezept und füllt diesen Slot — ohne zuerst „Neues Rezept“ zu nutzen.",
+      "photoAnalyzing": "Foto wird analysiert…",
+      "photoSlotUpdated": "Mahlzeit für diesen Slot erfasst (Foto ausgewertet).",
+      "photoQuota": "KI-Analyse-Limit erreicht. Später erneut versuchen.",
+      "photoEstimateNote": "Kalorien und Makros beziehen sich auf das Sichtbare im Foto, nicht auf eine willkürliche Standardportion."
     },
     "consumed": "Konsumiert",
     "remaining": "Verbleibend",

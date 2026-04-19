@@ -9,6 +9,8 @@ import { loginSchema } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordField } from "@/components/auth/password-field";
+import type { PasswordFieldLabels } from "@/components/auth/password-field";
 
 export type LoginFormDict = {
   title: string;
@@ -20,6 +22,12 @@ export type LoginFormDict = {
   noAccount: string;
   register: string;
   unexpected: string;
+  passwordToggle: PasswordFieldLabels;
+  oauth: {
+    continueWithGoogle: string;
+    divider: string;
+    error: string;
+  };
   loginErrors: {
     authCallback: string;
     invalidCredentials: string;
@@ -59,6 +67,7 @@ export function LoginForm({ dict }: { dict: LoginFormDict }) {
   >({});
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
 
   useEffect(() => {
     const err = searchParams.get("error");
@@ -107,6 +116,32 @@ export function LoginForm({ dict }: { dict: LoginFormDict }) {
     }
   }
 
+  async function onGoogleSignIn() {
+    setFormError(null);
+    setOauthLoading(true);
+    try {
+      const supabase = createClient();
+      const next = returnTo.startsWith("/") ? returnTo : "/dashboard";
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+      if (error) {
+        setFormError(dict.oauth.error);
+        return;
+      }
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      setFormError(dict.oauth.error);
+    } finally {
+      setOauthLoading(false);
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div className="space-y-2">
@@ -151,19 +186,18 @@ export function LoginForm({ dict }: { dict: LoginFormDict }) {
 
         <div className="space-y-2">
           <Label htmlFor="login-password">{dict.passwordLabel}</Label>
-          <Input
+          <PasswordField
             id="login-password"
             name="password"
-            type="password"
             autoComplete="current-password"
-            className="h-11"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={loading}
+            onChange={setPassword}
+            disabled={loading || oauthLoading}
             aria-invalid={Boolean(fieldErrors.password)}
             aria-describedby={
               fieldErrors.password ? "login-password-error" : undefined
             }
+            labels={dict.passwordToggle}
           />
           {fieldErrors.password ? (
             <p id="login-password-error" className="text-sm text-destructive">
@@ -174,10 +208,31 @@ export function LoginForm({ dict }: { dict: LoginFormDict }) {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || oauthLoading}
           className="h-11 w-full rounded-full text-sm font-medium"
         >
           {loading ? dict.submitLoading : dict.submit}
+        </Button>
+
+        <div className="relative py-2">
+          <div className="absolute inset-0 flex items-center" aria-hidden>
+            <span className="w-full border-t border-border/80" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase tracking-wide">
+            <span className="bg-card px-2 text-muted-foreground">
+              {dict.oauth.divider}
+            </span>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          disabled={loading || oauthLoading}
+          className="h-11 w-full rounded-full text-sm font-medium"
+          onClick={() => void onGoogleSignIn()}
+        >
+          {oauthLoading ? dict.submitLoading : dict.oauth.continueWithGoogle}
         </Button>
       </form>
 

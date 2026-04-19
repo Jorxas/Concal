@@ -19,6 +19,8 @@ export default async function LoginPage() {
     ...dict.auth.login,
     unexpected: dict.auth.unexpected,
     loginErrors: dict.auth.loginErrors,
+    passwordToggle: dict.auth.passwordToggle,
+    oauth: dict.auth.oauth,
   };
 
   return (

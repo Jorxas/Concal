@@ -233,13 +233,6 @@ export default async function DashboardPage() {
 
       <DashboardGoalsControls currentGoal={currentGoal} dict={controlsDict} />
 
-      <DayMealSlots
-        filledBySlot={filledBySlot}
-        mine={minePickRows}
-        saved={savedPickRows}
-        dict={daySlotsDict}
-      />
-
       {currentGoal ? (
         <div className="space-y-6">
           <DailyOverview
@@ -273,6 +266,13 @@ export default async function DashboardPage() {
           />
         </div>
       ) : null}
+
+      <DayMealSlots
+        filledBySlot={filledBySlot}
+        mine={minePickRows}
+        saved={savedPickRows}
+        dict={daySlotsDict}
+      />
     </div>
   );
 }
