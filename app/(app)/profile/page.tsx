@@ -1,5 +1,4 @@
 import { format } from "date-fns";
-import Image from "next/image";
 import { Bookmark, ChefHat, Globe } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/(app)/actions";
@@ -7,7 +6,7 @@ import { getSignedAvatarUrl } from "@/lib/storage/avatar";
 import { getSignedMealImageUrl } from "@/lib/storage/meal-media";
 import { firstMealImagePath } from "@/lib/meals/media";
 import { SavedMealRow } from "@/components/profile/saved-meal-row";
-import { ProfileAvatarForm } from "@/components/profile/profile-avatar-form";
+import { ProfileAvatarPicker } from "@/components/profile/profile-avatar-picker";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { Button } from "@/components/ui/button";
 import { getI18n } from "@/lib/i18n/server";
@@ -162,11 +161,19 @@ export default async function ProfilePage() {
     ? await getSignedAvatarUrl(supabase, avatarPath)
     : null;
 
-  const avatarFormDict = {
-    avatarChange: dict.profile.avatarChange,
-    avatarPick: dict.profile.avatarPick,
-    avatarUploading: dict.profile.avatarUploading,
+  const avatarPickerDict = {
+    avatarAlt: dict.profile.avatarAlt,
+    avatarMenuAria: dict.profile.avatarMenuAria,
+    avatarSheetTitle: dict.profile.avatarSheetTitle,
+    avatarView: dict.profile.avatarView,
+    avatarPickAction: dict.profile.avatarPickAction,
+    avatarRemove: dict.profile.avatarRemove,
+    avatarCancel: dict.profile.avatarCancel,
+    avatarRemoveTitle: dict.profile.avatarRemoveTitle,
+    avatarRemoveBody: dict.profile.avatarRemoveBody,
+    avatarRemoveConfirm: dict.profile.avatarRemoveConfirm,
     avatarSuccess: dict.profile.avatarSuccess,
+    avatarRemoved: dict.profile.avatarRemoved,
   };
 
   return (
@@ -174,23 +181,11 @@ export default async function ProfilePage() {
       <section className="space-y-5 rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
-            {avatarSignedUrl ? (
-              <Image
-                src={avatarSignedUrl}
-                alt={dict.profile.avatarAlt}
-                width={56}
-                height={56}
-                unoptimized
-                className="size-14 shrink-0 rounded-2xl object-cover ring-1 ring-border/60"
-              />
-            ) : (
-              <span
-                aria-hidden
-                className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 font-heading text-xl font-semibold text-primary"
-              >
-                {initials}
-              </span>
-            )}
+            <ProfileAvatarPicker
+              avatarSignedUrl={avatarSignedUrl}
+              initials={initials}
+              dict={avatarPickerDict}
+            />
             <div className="min-w-0">
               <p className="text-xs font-medium uppercase tracking-wide text-primary">
                 {dict.profile.title}
@@ -205,8 +200,6 @@ export default async function ProfilePage() {
           </div>
           <LocaleSwitcher current={locale} />
         </div>
-
-        <ProfileAvatarForm dict={avatarFormDict} />
 
         <form action={signOut}>
           <Button
