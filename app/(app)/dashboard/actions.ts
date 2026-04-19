@@ -15,6 +15,7 @@ import {
   removeMealImage,
   uploadMealPrimaryImage,
 } from "@/lib/storage/meal-media";
+import { upsertDailyUserGoals } from "@/lib/db/user-goals-upsert";
 import { userGoalFormSchema } from "@/lib/validations/goals";
 
 export type DaySlotActionResult =
@@ -53,45 +54,14 @@ export async function upsertUserGoals(
   const today = format(new Date(), "yyyy-MM-dd");
   const d = parsed.data;
 
-  const { data: existing, error: selErr } = await supabase
-    .from("user_goals")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("effective_from", today)
-    .maybeSingle();
-
-  if (selErr) {
-    return { error: friendlySupabaseError(selErr.message) };
-  }
-
-  if (existing?.id) {
-    const { error: updErr } = await supabase
-      .from("user_goals")
-      .update({
-        target_calories: d.target_calories,
-        target_protein_g: d.target_protein_g,
-        target_carbs_g: d.target_carbs_g,
-        target_fat_g: d.target_fat_g,
-      })
-      .eq("id", existing.id)
-      .eq("user_id", user.id);
-
-    if (updErr) {
-      return { error: friendlySupabaseError(`[user_goals] ${updErr.message}`) };
-    }
-  } else {
-    const { error: insErr } = await supabase.from("user_goals").insert({
-      user_id: user.id,
-      effective_from: today,
-      target_calories: d.target_calories,
-      target_protein_g: d.target_protein_g,
-      target_carbs_g: d.target_carbs_g,
-      target_fat_g: d.target_fat_g,
-    });
-
-    if (insErr) {
-      return { error: friendlySupabaseError(`[user_goals] ${insErr.message}`) };
-    }
+  const { error: goalErr } = await upsertDailyUserGoals(supabase, user.id, today, {
+    target_calories: d.target_calories,
+    target_protein_g: d.target_protein_g,
+    target_carbs_g: d.target_carbs_g,
+    target_fat_g: d.target_fat_g,
+  });
+  if (goalErr) {
+    return { error: goalErr };
   }
 
   revalidatePath("/dashboard");

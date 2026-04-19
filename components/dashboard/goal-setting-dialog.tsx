@@ -24,6 +24,7 @@ export type GoalRow = {
 export type GoalDialogDict = {
   title: string;
   subtitle: string;
+  profileHint?: string;
   caloriesLabel: string;
   proteinLabel: string;
   carbsLabel: string;
@@ -86,7 +87,15 @@ export function GoalSettingDialog({
           <DialogTitle className="font-heading text-2xl">
             {dict.title}
           </DialogTitle>
-          <DialogDescription>{dict.subtitle}</DialogDescription>
+          <DialogDescription>
+            {dict.subtitle}
+            {dict.profileHint ? (
+              <>
+                {" "}
+                <span className="text-muted-foreground">{dict.profileHint}</span>
+              </>
+            ) : null}
+          </DialogDescription>
         </DialogHeader>
 
         <form key={formKey} id={formId} action={submitGoals} className="space-y-4">

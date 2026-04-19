@@ -7,6 +7,10 @@ import { getSignedMealImageUrl } from "@/lib/storage/meal-media";
 import { firstMealImagePath } from "@/lib/meals/media";
 import { SavedMealRow } from "@/components/profile/saved-meal-row";
 import { ProfileAvatarPicker } from "@/components/profile/profile-avatar-picker";
+import {
+  NutritionProfileForm,
+  type NutritionProfileRow,
+} from "@/components/profile/nutrition-profile-form";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { Button } from "@/components/ui/button";
 import { getI18n } from "@/lib/i18n/server";
@@ -71,8 +75,12 @@ export default async function ProfilePage() {
   const dateLocale = dateLocaleFor(locale);
   const categoryDict = dict.meals.new.category;
 
-  const [{ count: mealsOwned }, { count: mealsPublic }, { count: savesTotal }] =
-    await Promise.all([
+  const [
+    { count: mealsOwned },
+    { count: mealsPublic },
+    { count: savesTotal },
+    profileResult,
+  ] = await Promise.all([
       supabase
         .from("meals")
         .select("*", { count: "exact", head: true })
@@ -86,7 +94,16 @@ export default async function ProfilePage() {
         .from("recipe_saves")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id),
+      supabase
+        .from("user_body_profile")
+        .select(
+          "sex, age_years, height_cm, weight_kg, activity_sessions_per_week, goal_type",
+        )
+        .eq("user_id", user.id)
+        .maybeSingle(),
     ]);
+
+  const bodyProfileRow = profileResult.error ? null : profileResult.data;
 
   const [{ data: savesRaw }, { data: ownedRaw }] = await Promise.all([
     supabase
@@ -161,6 +178,49 @@ export default async function ProfilePage() {
     ? await getSignedAvatarUrl(supabase, avatarPath)
     : null;
 
+  const nutritionInitial: NutritionProfileRow | null = (() => {
+    if (!bodyProfileRow) return null;
+    const sex = bodyProfileRow.sex;
+    const goal = bodyProfileRow.goal_type;
+    if (sex !== "male" && sex !== "female" && sex !== "other") return null;
+    if (goal !== "lose_weight" && goal !== "maintain" && goal !== "gain_mass") {
+      return null;
+    }
+    return {
+      sex,
+      age_years: Number(bodyProfileRow.age_years),
+      height_cm: Number(bodyProfileRow.height_cm),
+      weight_kg: Number(bodyProfileRow.weight_kg),
+      activity_sessions_per_week: Number(
+        bodyProfileRow.activity_sessions_per_week,
+      ),
+      goal_type: goal,
+    };
+  })();
+
+  const nutritionDict = {
+    title: dict.profile.nutrition.title,
+    subtitle: dict.profile.nutrition.subtitle,
+    disclaimer: dict.profile.nutrition.disclaimer,
+    sexLabel: dict.profile.nutrition.sexLabel,
+    sexMale: dict.profile.nutrition.sexMale,
+    sexFemale: dict.profile.nutrition.sexFemale,
+    sexOther: dict.profile.nutrition.sexOther,
+    ageLabel: dict.profile.nutrition.ageLabel,
+    heightLabel: dict.profile.nutrition.heightLabel,
+    weightLabel: dict.profile.nutrition.weightLabel,
+    activityLabel: dict.profile.nutrition.activityLabel,
+    activityHelp: dict.profile.nutrition.activityHelp,
+    goalLabel: dict.profile.nutrition.goalLabel,
+    goalLose: dict.profile.nutrition.goalLose,
+    goalMaintain: dict.profile.nutrition.goalMaintain,
+    goalGain: dict.profile.nutrition.goalGain,
+    submit: dict.profile.nutrition.submit,
+    saving: dict.profile.nutrition.saving,
+    successToast: dict.profile.nutrition.successToast,
+    afterSaveHint: dict.profile.nutrition.afterSaveHint,
+  };
+
   const avatarPickerDict = {
     avatarAlt: dict.profile.avatarAlt,
     avatarMenuAria: dict.profile.avatarMenuAria,
@@ -211,6 +271,8 @@ export default async function ProfilePage() {
           </Button>
         </form>
       </section>
+
+      <NutritionProfileForm initial={nutritionInitial} dict={nutritionDict} />
 
       <section aria-labelledby="stats-heading">
         <h2 id="stats-heading" className="sr-only">

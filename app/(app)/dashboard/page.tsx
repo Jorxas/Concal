@@ -198,6 +198,7 @@ export default async function DashboardPage() {
     editGoal: dict.dashboard.editGoal,
     goal: {
       ...dict.dashboard.goal,
+      profileHint: dict.dashboard.goal.profileHint,
       save: dict.common.save,
       cancel: dict.common.cancel,
     },
