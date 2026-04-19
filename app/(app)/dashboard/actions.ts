@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { format } from "date-fns";
 import { createClient } from "@/lib/supabase/server";
+import { friendlySupabaseError } from "@/lib/supabase/db-error-message";
 import { userGoalFormSchema } from "@/lib/validations/goals";
 
 export type UpsertGoalsState = {
@@ -56,7 +57,7 @@ export async function upsertUserGoals(
   );
 
   if (error) {
-    return { error: error.message };
+    return { error: friendlySupabaseError(error.message) };
   }
 
   revalidatePath("/dashboard");

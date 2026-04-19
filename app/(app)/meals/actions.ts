@@ -12,6 +12,7 @@ import {
   createMealFormSchema,
   parseIngredientsJson,
 } from "@/lib/validations/meals";
+import { friendlySupabaseError } from "@/lib/supabase/db-error-message";
 
 export type CreateMealResult =
   | { success: true; mealId: string }
@@ -110,7 +111,7 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
     if (uploadedPath) {
       await removeMealImage(supabase, uploadedPath);
     }
-    return { success: false, error: mealError.message };
+    return { success: false, error: friendlySupabaseError(mealError.message) };
   }
 
   if (uploadedPath) {
@@ -123,7 +124,7 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
     if (mediaError) {
       await supabase.from("meals").delete().eq("id", mealId);
       await removeMealImage(supabase, uploadedPath);
-      return { success: false, error: mediaError.message };
+      return { success: false, error: friendlySupabaseError(mediaError.message) };
     }
   }
 
@@ -144,7 +145,7 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
     if (uploadedPath) {
       await removeMealImage(supabase, uploadedPath);
     }
-    return { success: false, error: logError.message };
+    return { success: false, error: friendlySupabaseError(logError.message) };
   }
 
   revalidatePath("/dashboard");
@@ -180,7 +181,7 @@ export async function toggleLikeMeal(mealId: string): Promise<ToggleSocialResult
     .maybeSingle();
 
   if (selErr) {
-    return { ok: false, error: selErr.message };
+    return { ok: false, error: friendlySupabaseError(selErr.message) };
   }
 
   if (existing) {
@@ -190,7 +191,7 @@ export async function toggleLikeMeal(mealId: string): Promise<ToggleSocialResult
       .eq("user_id", user.id)
       .eq("meal_id", mealId);
     if (delErr) {
-      return { ok: false, error: delErr.message };
+      return { ok: false, error: friendlySupabaseError(delErr.message) };
     }
     revalidatePath("/meals/explore");
     revalidatePath(`/meals/${mealId}`);
@@ -203,7 +204,7 @@ export async function toggleLikeMeal(mealId: string): Promise<ToggleSocialResult
     meal_id: mealId,
   });
   if (insErr) {
-    return { ok: false, error: insErr.message };
+    return { ok: false, error: friendlySupabaseError(insErr.message) };
   }
   revalidatePath("/meals/explore");
   revalidatePath(`/meals/${mealId}`);
@@ -233,7 +234,7 @@ export async function toggleSaveMeal(mealId: string): Promise<ToggleSocialResult
     .maybeSingle();
 
   if (selErr) {
-    return { ok: false, error: selErr.message };
+    return { ok: false, error: friendlySupabaseError(selErr.message) };
   }
 
   if (existing) {
@@ -243,7 +244,7 @@ export async function toggleSaveMeal(mealId: string): Promise<ToggleSocialResult
       .eq("user_id", user.id)
       .eq("meal_id", mealId);
     if (delErr) {
-      return { ok: false, error: delErr.message };
+      return { ok: false, error: friendlySupabaseError(delErr.message) };
     }
     revalidatePath("/meals/explore");
     revalidatePath(`/meals/${mealId}`);
@@ -256,7 +257,7 @@ export async function toggleSaveMeal(mealId: string): Promise<ToggleSocialResult
     meal_id: mealId,
   });
   if (insErr) {
-    return { ok: false, error: insErr.message };
+    return { ok: false, error: friendlySupabaseError(insErr.message) };
   }
   revalidatePath("/meals/explore");
   revalidatePath(`/meals/${mealId}`);
