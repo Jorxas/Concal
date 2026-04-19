@@ -236,6 +236,12 @@
   "profile": {
     "title": "Profil",
     "subtitle": "Statistiques et recettes enregistrées.",
+    "signOutButton": "Se déconnecter",
+    "avatarChange": "Photo de profil",
+    "avatarPick": "Envoyer",
+    "avatarUploading": "Envoi…",
+    "avatarSuccess": "Photo mise à jour.",
+    "avatarAlt": "Ta photo de profil",
     "editProfile": "Modifier le profil",
     "stats": {
       "meals": "Repas créés",

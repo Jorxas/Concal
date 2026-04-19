@@ -85,7 +85,7 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
       file: imageFile,
     });
     if ("error" in upload) {
-      return { success: false, error: upload.error };
+      return { success: false, error: friendlySupabaseError(upload.error) };
     }
     uploadedPath = upload.path;
   }

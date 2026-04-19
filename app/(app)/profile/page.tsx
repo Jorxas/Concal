@@ -1,10 +1,15 @@
 import { format } from "date-fns";
+import Image from "next/image";
 import { Bookmark, ChefHat, Globe } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { signOut } from "@/app/(app)/actions";
+import { getSignedAvatarUrl } from "@/lib/storage/avatar";
 import { getSignedMealImageUrl } from "@/lib/storage/meal-media";
 import { firstMealImagePath } from "@/lib/meals/media";
 import { SavedMealRow } from "@/components/profile/saved-meal-row";
+import { ProfileAvatarForm } from "@/components/profile/profile-avatar-form";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
+import { Button } from "@/components/ui/button";
 import { getI18n } from "@/lib/i18n/server";
 import { dateLocaleFor } from "@/lib/i18n/date";
 import { mealCategoryLabel } from "@/lib/meals/labels";
@@ -150,30 +155,68 @@ export default async function ProfilePage() {
   );
 
   const initials = initialsFromEmail(user.email ?? null);
+  const rawAvatar = user.user_metadata?.avatar_storage_path;
+  const avatarPath =
+    typeof rawAvatar === "string" && rawAvatar.length > 0 ? rawAvatar : null;
+  const avatarSignedUrl = avatarPath
+    ? await getSignedAvatarUrl(supabase, avatarPath)
+    : null;
+
+  const avatarFormDict = {
+    avatarChange: dict.profile.avatarChange,
+    avatarPick: dict.profile.avatarPick,
+    avatarUploading: dict.profile.avatarUploading,
+    avatarSuccess: dict.profile.avatarSuccess,
+  };
 
   return (
     <div className="mx-auto w-full max-w-3xl flex-1 space-y-10 px-4 py-8 pb-24 md:px-8 md:py-10 md:pb-10">
-      <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
-        <div className="flex items-center gap-4">
-          <span
-            aria-hidden
-            className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 font-heading text-xl font-semibold text-primary"
-          >
-            {initials}
-          </span>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-primary">
-              {dict.profile.title}
-            </p>
-            <h1 className="mt-0.5 font-heading text-2xl tracking-tight md:text-3xl">
-              {user.email}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {dict.profile.subtitle}
-            </p>
+      <section className="space-y-5 rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-4">
+            {avatarSignedUrl ? (
+              <Image
+                src={avatarSignedUrl}
+                alt={dict.profile.avatarAlt}
+                width={56}
+                height={56}
+                unoptimized
+                className="size-14 shrink-0 rounded-2xl object-cover ring-1 ring-border/60"
+              />
+            ) : (
+              <span
+                aria-hidden
+                className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 font-heading text-xl font-semibold text-primary"
+              >
+                {initials}
+              </span>
+            )}
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wide text-primary">
+                {dict.profile.title}
+              </p>
+              <h1 className="mt-0.5 break-all font-heading text-2xl tracking-tight md:text-3xl">
+                {user.email}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {dict.profile.subtitle}
+              </p>
+            </div>
           </div>
+          <LocaleSwitcher current={locale} />
         </div>
-        <LocaleSwitcher current={locale} />
+
+        <ProfileAvatarForm dict={avatarFormDict} />
+
+        <form action={signOut}>
+          <Button
+            type="submit"
+            variant="outline"
+            className="h-10 w-full rounded-full sm:w-auto"
+          >
+            {dict.profile.signOutButton}
+          </Button>
+        </form>
       </section>
 
       <section aria-labelledby="stats-heading">

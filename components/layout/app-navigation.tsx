@@ -5,13 +5,16 @@ import { usePathname } from "next/navigation";
 import {
   Compass,
   LayoutDashboard,
+  LogOut,
   PlusCircle,
   UserRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { signOut } from "@/app/(app)/actions";
 import { Logo } from "@/components/marketing/logo";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { UserChip } from "@/components/layout/user-chip";
+import { Button } from "@/components/ui/button";
 import type { Locale } from "@/lib/i18n/config";
 
 export type NavDict = {
@@ -100,6 +103,19 @@ export function AppNavigation({ dict, locale, email }: AppNavigationProps) {
         aria-label={dict.primary}
         className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md md:hidden"
       >
+        <div className="mb-1.5 flex justify-end border-b border-border/50 px-1 pb-1.5">
+          <form action={signOut}>
+            <Button
+              type="submit"
+              variant="ghost"
+              size="sm"
+              className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="size-3.5" aria-hidden />
+              {dict.signOut}
+            </Button>
+          </form>
+        </div>
         <div className="flex items-stretch justify-around gap-1">
           {NAV.map((item) => {
             const active = isActive(pathname, item.href);
