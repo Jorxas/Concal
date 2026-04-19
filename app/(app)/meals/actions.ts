@@ -111,7 +111,10 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
     if (uploadedPath) {
       await removeMealImage(supabase, uploadedPath);
     }
-    return { success: false, error: friendlySupabaseError(mealError.message) };
+    return {
+      success: false,
+      error: friendlySupabaseError(`[meals] ${mealError.message}`),
+    };
   }
 
   if (uploadedPath) {
@@ -124,7 +127,10 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
     if (mediaError) {
       await supabase.from("meals").delete().eq("id", mealId);
       await removeMealImage(supabase, uploadedPath);
-      return { success: false, error: friendlySupabaseError(mediaError.message) };
+      return {
+        success: false,
+        error: friendlySupabaseError(`[meal_media] ${mediaError.message}`),
+      };
     }
   }
 
@@ -145,7 +151,10 @@ export async function createMeal(formData: FormData): Promise<CreateMealResult> 
     if (uploadedPath) {
       await removeMealImage(supabase, uploadedPath);
     }
-    return { success: false, error: friendlySupabaseError(logError.message) };
+    return {
+      success: false,
+      error: friendlySupabaseError(`[meal_logs] ${logError.message}`),
+    };
   }
 
   revalidatePath("/dashboard");

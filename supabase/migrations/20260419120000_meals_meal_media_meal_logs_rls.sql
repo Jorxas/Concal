@@ -1,5 +1,6 @@
--- Concal : politiques RLS pour enregistrer un repas (client authentifié, clé anon).
--- À exécuter dans Supabase → SQL Editor une fois (ou via CLI `supabase db push`).
+-- Concal : politiques RLS pour enregistrer un repas (clé anon + JWT utilisateur).
+-- Exécuter dans Supabase → SQL Editor (tout le fichier). Réexécute après mise à jour du dépôt.
+-- Les politiques ne ciblent pas « TO authenticated » : l’accès repose sur auth.uid() (JWT).
 
 -- ---------------------------------------------------------------------------
 -- meals
@@ -10,21 +11,21 @@ drop policy if exists "meals_select_visible" on public.meals;
 create policy "meals_select_visible"
   on public.meals
   for select
-  to authenticated
   using (owner_id = (select auth.uid()) or coalesce(is_public, false) = true);
 
 drop policy if exists "meals_insert_own" on public.meals;
 create policy "meals_insert_own"
   on public.meals
   for insert
-  to authenticated
-  with check (owner_id = (select auth.uid()));
+  with check (
+    (select auth.uid()) is not null
+    and owner_id = (select auth.uid())
+  );
 
 drop policy if exists "meals_update_own" on public.meals;
 create policy "meals_update_own"
   on public.meals
   for update
-  to authenticated
   using (owner_id = (select auth.uid()))
   with check (owner_id = (select auth.uid()));
 
@@ -32,7 +33,6 @@ drop policy if exists "meals_delete_own" on public.meals;
 create policy "meals_delete_own"
   on public.meals
   for delete
-  to authenticated
   using (owner_id = (select auth.uid()));
 
 -- ---------------------------------------------------------------------------
@@ -44,7 +44,6 @@ drop policy if exists "meal_media_select_visible" on public.meal_media;
 create policy "meal_media_select_visible"
   on public.meal_media
   for select
-  to authenticated
   using (
     exists (
       select 1
@@ -58,9 +57,9 @@ drop policy if exists "meal_media_insert_own_meal" on public.meal_media;
 create policy "meal_media_insert_own_meal"
   on public.meal_media
   for insert
-  to authenticated
   with check (
-    exists (
+    (select auth.uid()) is not null
+    and exists (
       select 1
       from public.meals m
       where m.id = meal_media.meal_id
@@ -72,7 +71,6 @@ drop policy if exists "meal_media_delete_own_meal" on public.meal_media;
 create policy "meal_media_delete_own_meal"
   on public.meal_media
   for delete
-  to authenticated
   using (
     exists (
       select 1
@@ -91,21 +89,21 @@ drop policy if exists "meal_logs_select_own" on public.meal_logs;
 create policy "meal_logs_select_own"
   on public.meal_logs
   for select
-  to authenticated
   using (user_id = (select auth.uid()));
 
 drop policy if exists "meal_logs_insert_own" on public.meal_logs;
 create policy "meal_logs_insert_own"
   on public.meal_logs
   for insert
-  to authenticated
-  with check (user_id = (select auth.uid()));
+  with check (
+    (select auth.uid()) is not null
+    and user_id = (select auth.uid())
+  );
 
 drop policy if exists "meal_logs_update_own" on public.meal_logs;
 create policy "meal_logs_update_own"
   on public.meal_logs
   for update
-  to authenticated
   using (user_id = (select auth.uid()))
   with check (user_id = (select auth.uid()));
 
@@ -113,5 +111,4 @@ drop policy if exists "meal_logs_delete_own" on public.meal_logs;
 create policy "meal_logs_delete_own"
   on public.meal_logs
   for delete
-  to authenticated
   using (user_id = (select auth.uid()));
